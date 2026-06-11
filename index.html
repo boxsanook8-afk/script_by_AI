@@ -7,10 +7,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- marked สำหรับแปลง Markdown เป็น HTML ในฝั่งไคลเอนต์ -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- DOMPurify สำหรับ sanitize HTML ที่มาจาก Markdown (ป้องกัน XSS) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js" integrity="" crossorigin="anonymous"></script>
   <style>
     body { font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
     /* ทำให้ iframe เต็มพื้นที่ภายในคอนเทนเนอร์ */
     #project-frame { width: 100%; height: calc(100vh - 80px); border: none; }
+
+    /* ปรับสไตล์ modal README ให้น่าอ่าน */
+    .readme-modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); }
+    .readme-container { width: 100%; max-width: 900px; max-height: 80vh; overflow: hidden; border-radius: 12px; }
+    .readme-body { height: calc(80vh - 88px); overflow: auto; padding: 1rem 1.25rem; }
+
+    /* สไตล์เนื้อหา Markdown เบื้องต้น (ถ้า tailwind typography ไม่มีให้) */
+    .readme-body h1, .readme-body h2, .readme-body h3 { color: #1f2937; margin-top: 1rem; margin-bottom: 0.5rem; }
+    .readme-body p { color: #374151; margin-bottom: 0.75rem; }
+    .readme-body pre { background: #111827; color: #f8fafc; padding: 0.75rem; border-radius: 8px; overflow: auto; }
+    .readme-body code { background: #f3f4f6; padding: 0.15rem 0.35rem; border-radius: 4px; }
+    .readme-body a { color: #4f46e5; text-decoration: underline; }
+
+    /* loading spinner */
+    .spinner {
+      width: 28px; height: 28px; border: 4px solid rgba(0,0,0,0.08); border-top-color: #6366f1; border-radius: 9999px; animation: spin 1s linear infinite; margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen">
@@ -102,17 +122,25 @@
   </footer>
 
   <!-- Modal สำหรับแสดง README -->
-  <div id="readme-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div id="modal-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeReadme()"></div>
-    <div class="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-auto z-50">
+  <div id="readme-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 readme-modal-backdrop">
+    <div class="relative bg-white readme-container">
       <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 id="modal-title" class="text-lg font-semibold text-gray-800">README</h3>
+        <div>
+          <h3 id="modal-title" class="text-lg font-semibold text-gray-800">README</h3>
+          <div id="modal-sub" class="text-xs text-gray-500">ดูเอกสารคำอธิบายของโปรเจกต์</div>
+        </div>
         <div class="flex items-center gap-2">
           <a id="modal-raw-link" class="text-sm text-indigo-600 underline" href="#" target="_blank">ดูต้นฉบับ (raw)</a>
+          <a id="modal-download-link" class="text-sm text-indigo-600 underline hidden" href="#" download>ดาวน์โหลด .md</a>
           <button onclick="closeReadme()" class="text-gray-500 hover:text-gray-700 px-2">✕</button>
         </div>
       </div>
-      <div id="modal-body" class="p-4 prose max-w-none text-gray-800"></div>
+      <div id="modal-body" class="readme-body">
+        <div id="modal-loading" class="py-6 text-center">
+          <div class="spinner"></div>
+          <div class="text-sm text-gray-500 mt-3">กำลังโหลด README...</div>
+        </div>
+      </div>
       <div id="modal-error" class="p-4 text-red-600 hidden"></div>
     </div>
   </div>
@@ -122,24 +150,31 @@
     const REPO = 'script_by_AI';
     const BRANCH = 'main';
 
-    // เปิด README modal (เดิม)
+    // เปิด README modal (ปรับปรุงสวยขึ้น)
     function openReadme(path, title) {
       const modal = document.getElementById('readme-modal');
       const body = document.getElementById('modal-body');
       const error = document.getElementById('modal-error');
       const modalTitle = document.getElementById('modal-title');
       const rawLink = document.getElementById('modal-raw-link');
+      const downloadLink = document.getElementById('modal-download-link');
+      const loading = document.getElementById('modal-loading');
 
       modalTitle.textContent = title + ' — README';
-      body.innerHTML = '<div class="text-sm text-gray-500">กำลังโหลด...</div>';
+      document.getElementById('modal-sub').textContent = path;
       error.classList.add('hidden');
+      downloadLink.classList.add('hidden');
 
       const rawUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${path}`;
       rawLink.href = rawUrl;
+      downloadLink.href = rawUrl;
 
       // แสดง modal
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+
+      // แสดง loading
+      body.innerHTML = document.getElementById('modal-loading').outerHTML;
 
       fetch(rawUrl)
         .then(resp => {
@@ -147,12 +182,18 @@
           return resp.text();
         })
         .then(md => {
-          // แปลง markdown เป็น HTML ด้วย marked
+          const trimmed = md.trim();
+          if (!trimmed) {
+            body.innerHTML = '<div class="p-6 text-center text-gray-500">ยังไม่มี README สำหรับโปรเจกต์นี้</div>';
+            return;
+          }
+          // แปลง markdown เป็น HTML ด้วย marked แล้ว sanitize ด้วย DOMPurify
           try {
-            const html = marked.parse(md);
-            body.innerHTML = html;
+            const rawHtml = marked.parse(trimmed);
+            const safe = DOMPurify.sanitize(rawHtml, {ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']});
+            body.innerHTML = '<div class="px-2 py-1">' + safe + '</div>';
+            downloadLink.classList.remove('hidden');
           } catch (e) {
-            // หาก parsing ล้มเหลว ให้แสดงเป็น pre
             body.innerHTML = '<pre class="whitespace-pre-wrap">' + escapeHtml(md) + '</pre>';
           }
         })
