@@ -43,4 +43,6 @@ name=NumberWorksheet/README.md url=https://github.com/boxsanook8-afk/script_by_A
 
 ลิขสิทธิ์ (License)
 - ใส่ลิขสิทธิ์ตามที่ต้องการ เช่น MIT — ถ้าต้องการ ผมสามารถเพิ่มไฟล์ LICENSE ให้ได้
+
+**ลิงก์สาธารณะสำหรับ Canvas :** https://gemini.google.com/share/ddb1c85bb946
  
