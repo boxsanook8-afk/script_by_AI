@@ -79,19 +79,35 @@
         </div>
 
         <!-- ปุ่ม Actions - ซ่อนเมื่อพิมพ์ และซ่อนใน PDF -->
-        <div data-html2canvas-ignore="true" class="mt-8 flex justify-center gap-4 print:hidden flex-wrap">
-          <button onclick="addRow()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+        <div data-html2canvas-ignore="true" class="mt-8 flex justify-center gap-3 print:hidden flex-wrap">
+          <button onclick="addRow()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
             <span>+ เพิ่มข้อใหม่</span>
           </button>
           
-          <button onclick="handlePrint()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
-            <i data-lucide="printer" width="20" height="20"></i>
-            <span>ดาวน์โหลดเป็น PDF</span>
+          <!-- แก้ไขปุ่มสุ่มตัวเลข ให้มีช่องกรอกช่วงตัวเลข -->
+          <div class="flex items-center bg-purple-100 rounded-full p-1 shadow-md">
+            <input type="number" id="min-random" value="10" title="ค่าต่ำสุด" class="w-20 px-3 py-1.5 rounded-l-full focus:outline-none text-center font-bold text-gray-700 bg-white border-r border-gray-200">
+            <span class="text-purple-600 font-bold px-2">-</span>
+            <input type="number" id="max-random" value="9999" title="ค่าสูงสุด" class="w-24 px-3 py-1.5 focus:outline-none text-center font-bold text-gray-700 bg-white">
+            <button onclick="randomizeNumbers()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-1.5 px-4 ml-1 rounded-full transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+              <i data-lucide="shuffle" width="20" height="20"></i>
+              <span>สุ่มตัวเลข</span>
+            </button>
+          </div>
+
+          <button onclick="randomizeHidden()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <i data-lucide="eye-off" width="20" height="20"></i>
+            <span>สุ่มซ่อนช่อง</span>
           </button>
 
-          <button onclick="handleExportWord()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+          <button onclick="handlePrint()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <i data-lucide="printer" width="20" height="20"></i>
+            <span>ดาวน์โหลด PDF</span>
+          </button>
+
+          <button onclick="handleExportWord()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-5 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
             <i data-lucide="file-text" width="20" height="20"></i>
-            <span>ดาวน์โหลดเป็น Word</span>
+            <span>ดาวน์โหลด Word</span>
           </button>
         </div>
       </div>
@@ -182,19 +198,19 @@
     // --- State ของ Application ---
     let activeView = 'all';
     let rows = [
-      { val: '511', showArabic: true, showThai: true, showText: true },
-      { val: '237', showArabic: true, showThai: true, showText: true },
-      { val: '361', showArabic: true, showThai: true, showText: true },
-      { val: '478', showArabic: true, showThai: true, showText: true },
-      { val: '692', showArabic: true, showThai: true, showText: true },
-      { val: '674', showArabic: true, showThai: true, showText: true },
-      { val: '736', showArabic: true, showThai: true, showText: true },
-      { val: '893', showArabic: true, showThai: true, showText: true },
-      { val: '984', showArabic: true, showThai: true, showText: true },
-      { val: '1000', showArabic: true, showThai: true, showText: true }
+      { val: '511', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '237', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '361', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '478', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '692', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '674', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '736', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '893', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '984', showInput: true, showArabic: true, showThai: true, showText: true },
+      { val: '1000', showInput: true, showArabic: true, showThai: true, showText: true }
     ];
 
-    // --- ระบบจำตำแหน่ง Focus เวลาพิมพ์ (เพื่อไม่ให้หลุดเวลา Re-render) ---
+    // --- ระบบจำตำแหน่ง Focus เวลาพิมพ์ ---
     let activeElementId = null;
     let selectionStart = 0;
     let selectionEnd = 0;
@@ -223,11 +239,12 @@
     const handleInputChange = (index, el) => {
       const cleanValue = el.value.replace(/[^0-9]/g, '');
       rows[index].val = cleanValue;
+      rows[index].showInput = true; // หากมีการพิมพ์แก้ไข ให้แสดงคอลัมน์จำนวนอัตโนมัติ
       renderApp();
     };
 
     const addRow = () => {
-      rows.push({ val: '', showArabic: true, showThai: true, showText: true });
+      rows.push({ val: '', showInput: true, showArabic: true, showThai: true, showText: true });
       renderApp();
     };
 
@@ -238,7 +255,8 @@
 
     const toggleRow = (index) => {
       const row = rows[index];
-      const allShown = row.showArabic && row.showThai && row.showText;
+      const allShown = row.showInput && row.showArabic && row.showThai && row.showText;
+      row.showInput = !allShown;
       row.showArabic = !allShown;
       row.showThai = !allShown;
       row.showText = !allShown;
@@ -262,12 +280,41 @@
       renderApp();
     };
 
+    // --- ฟังก์ชันใหม่: สุ่มตัวเลข และ สุ่มซ่อน ---
+    const randomizeNumbers = () => {
+      // ดึงค่าช่วงต่ำสุดและสูงสุดจาก Input
+      const minInput = parseInt(document.getElementById('min-random').value) || 0;
+      const maxInput = parseInt(document.getElementById('max-random').value) || 100;
+      
+      // ป้องกันกรณีผู้ใช้กรอกเลขสลับกัน
+      const min = Math.min(minInput, maxInput);
+      const max = Math.max(minInput, maxInput);
+
+      rows.forEach(row => {
+        // สุ่มตัวเลขในช่วงที่กำหนด
+        row.val = Math.floor(Math.random() * (max - min + 1) + min).toString();
+      });
+      renderApp();
+    };
+
+    const randomizeHidden = () => {
+      rows.forEach(row => {
+        // สุ่มเปิดไว้แค่ 1 ช่อง (0=จำนวน, 1=อารบิก, 2=ไทย, 3=ตัวหนังสือ) ให้เป็นคำใบ้
+        const visibleCol = Math.floor(Math.random() * 4); 
+        row.showInput = (visibleCol === 0);
+        row.showArabic = (visibleCol === 1);
+        row.showThai = (visibleCol === 2);
+        row.showText = (visibleCol === 3);
+      });
+      renderApp();
+    };
+
     // --- ฟังก์ชันสำหรับการ Render หน้าจอ ---
     const renderApp = () => {
       storeFocus();
       renderTabs();
       renderTable();
-      lucide.createIcons(); // โหลดไอคอนใหม่ที่เพิ่งถูกสร้างขึ้นมาใน DOM
+      lucide.createIcons();
       restoreFocus();
     };
 
@@ -297,7 +344,13 @@
       // --- สร้าง Header ---
       let theadHTML = `<tr class="bg-gray-100 print:bg-gray-200">
         <th class="border-2 border-gray-800 p-4 text-center w-12 md:w-16 font-bold text-lg">ข้อ</th>
-        <th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-1/5' : 'w-1/3'} font-bold text-lg">จำนวน</th>`;
+        
+        <th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-1/5' : 'w-1/3'} font-bold text-lg relative pr-8">
+          จำนวน
+          <button onclick="toggleCol('showInput')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 print:hidden" data-html2canvas-ignore="true" title="${isColVisible('showInput') ? 'ซ่อนคอลัมน์นี้' : 'แสดงคอลัมน์นี้'}">
+            <i data-lucide="${isColVisible('showInput') ? 'eye' : 'eye-off'}" width="18" height="18"></i>
+          </button>
+        </th>`;
       
       if (activeView === 'all' || activeView === 'arabic') {
         const icon = isColVisible('showArabic') ? 'eye' : 'eye-off';
@@ -343,8 +396,14 @@
           <td class="border-2 border-gray-800 p-2 text-center font-bold text-lg text-gray-700 print:text-black">
             ${index + 1}
           </td>
-          <td class="border-2 border-gray-800 p-2 text-center">
-            <input type="text" id="input-${index}" value="${row.val}" oninput="handleInputChange(${index}, this)" placeholder="..." class="w-full p-2 text-center text-lg font-bold bg-transparent border-b-2 border-dashed border-gray-300 focus:outline-none focus:border-blue-500 transition-colors print:border-none print:p-0 print:placeholder-transparent" />
+          
+          <td class="border-2 border-gray-800 p-2 text-center relative group">
+            <input type="text" id="input-${index}" value="${row.val}" oninput="handleInputChange(${index}, this)" placeholder="..." class="w-full p-2 text-center text-lg font-bold bg-transparent border-b-2 border-dashed border-gray-300 focus:outline-none focus:border-blue-500 transition-colors print:border-none print:p-0 print:placeholder-transparent ${row.showInput ? 'text-gray-800 print:text-black' : 'text-transparent print:text-transparent select-none'}" />
+            ${!row.showInput ? `<span class="absolute inset-0 flex items-center justify-center pointer-events-none text-red-600 font-bold text-xl print:text-red-600 input-placeholder-dots">...</span>` : ''}
+            
+            <button onclick="toggleCell(${index}, 'showInput')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-blue-500 opacity-40 group-hover:opacity-100 transition-opacity print:hidden z-10" data-html2canvas-ignore="true">
+              <i data-lucide="${row.showInput ? 'eye' : 'eye-off'}" width="16" height="16"></i>
+            </button>
           </td>`;
         
         if (activeView === 'all' || activeView === 'arabic') {
@@ -375,7 +434,7 @@
           </td>`;
         }
 
-        const allShown = row.showArabic && row.showThai && row.showText;
+        const allShown = row.showInput && row.showArabic && row.showThai && row.showText;
         const rowIcon = allShown ? 'eye' : 'eye-off';
         const rowTitle = allShown ? 'ซ่อนทั้งแถว' : 'แสดงทั้งแถว';
         tr += `<td data-html2canvas-ignore="true" class="border-2 border-gray-800 p-2 bg-gray-50 print:hidden">
@@ -419,15 +478,21 @@
       const inputs = clone.querySelectorAll('input');
       
       inputs.forEach(input => {
-        const textNode = document.createTextNode(input.value || '...');
+        const isHidden = input.classList.contains('text-transparent');
+        const displayVal = isHidden ? '...' : (input.value || '...');
+        const textNode = document.createTextNode(displayVal);
         const span = document.createElement('span');
         span.style.fontWeight = 'bold';
+        if (isHidden) span.style.color = '#dc2626';
         span.appendChild(textNode);
         input.parentNode.replaceChild(span, input);
       });
 
       const ignoredElements = clone.querySelectorAll('[data-html2canvas-ignore="true"]');
       ignoredElements.forEach(el => el.remove());
+
+      const placeholders = clone.querySelectorAll('.input-placeholder-dots');
+      placeholders.forEach(el => el.remove());
 
       const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
