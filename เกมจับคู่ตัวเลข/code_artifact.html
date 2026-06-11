@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมจับคู่ตัวเลขฮินดูอารบิก ตัวเลขไทย และตัวหนังสือ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0fdf4;
+            color: #1f2937;
+        }
+        .card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+        .card:hover:not(.matched) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            transform: scale(1.02);
+        }
+        .matched {
+            border-color: #22c55e;
+            background-color: #dcfce7;
+            color: #15803d;
+            opacity: 0.7;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        .error {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+        /* Confetti animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f2d74e;
+            animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 sm:px-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-green-700 mb-3">เกมจับคู่ตัวเลข</h1>
+            <p class="text-lg text-gray-600">ตัวเลขฮินดูอารบิก ตัวเลขไทย และตัวหนังสือ</p>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนข้อ</label>
+                    <select id="itemCount" class="border-gray-300 rounded-md shadow-sm border p-2 w-24 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                        <option value="3">3 ข้อ</option>
+                        <option value="5" selected>5 ข้อ</option>
+                        <option value="7">7 ข้อ</option>
+                        <option value="10">10 ข้อ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ระดับความยาก (ตัวเลขไม่เกิน)</label>
+                    <select id="maxNumber" class="border-gray-300 rounded-md shadow-sm border p-2 w-36 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                        <option value="100">100 (หลักสิบ)</option>
+                        <option value="1000">1,000 (หลักร้อย)</option>
+                        <option value="10000" selected>10,000 (หลักพัน)</option>
+                        <option value="100000">100,000 (หลักหมื่น)</option>
+                        <option value="1000000">1,000,000 (หลักแสน)</option>
+                    </select>
+                </div>
+                <button onclick="startGame()" class="mt-auto bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md shadow transition duration-150 ease-in-out h-[42px]">
+                    สร้างเกมใหม่
+                </button>
+            </div>
+            
+            <div class="w-full md:w-auto">
+                <button onclick="exportToWord()" class="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow transition duration-150 ease-in-out h-[42px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Export to Word พร้อมเฉลย
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Instruction -->
+        <div class="text-center mb-6">
+            <p class="text-lg font-medium text-gray-700 bg-yellow-100 inline-block px-4 py-2 rounded-full shadow-sm">
+                💡 วิธีเล่น: คลิกเลือกไพ่จากทั้ง 3 ฝั่ง ให้ตรงกัน (อารบิก ↔ ไทย ↔ ตัวหนังสือ)
+            </p>
+        </div>
+
+        <!-- Game Area -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="gameArea">
+            <!-- Columns will be injected here by JS -->
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="hidden mt-8 text-center animate-bounce">
+            <h2 class="text-3xl font-bold text-green-600">🎉 เก่งมาก! จับคู่สำเร็จทั้งหมด 🎉</h2>
+            <button onclick="startGame()" class="mt-4 bg-green-100 text-green-800 font-medium py-2 px-6 rounded-full hover:bg-green-200 transition">
+                เล่นอีกครั้ง
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Core Logic for Number Translation ---
+
+        function getThaiWord(num) {
+            if (num === 0) return "ศูนย์";
+            const numbers = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+            const positions = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+            
+            let numStr = num.toString();
+            let result = "";
+            let length = numStr.length;
+
+            for (let i = 0; i < length; i++) {
+                let d = parseInt(numStr[i]);
+                let pos = length - 1 - i;
+
+                if (d === 0) continue;
+
+                if (pos % 6 === 1 && d === 1) {
+                    result += "สิบ";
+                } else if (pos % 6 === 1 && d === 2) {
+                    result += "ยี่สิบ";
+                } else if (pos % 6 === 0 && d === 1 && i > 0 && parseInt(numStr[i-1]) !== 0) {
+                    // เอ็ด is used when ending in 1 and not single digit, e.g. 11, 21, 101
+                    result += "เอ็ด" + positions[pos % 6];
+                } else {
+                    result += numbers[d] + positions[pos % 6];
+                }
+
+                if (pos > 0 && pos % 6 === 0) {
+                    result += "ล้าน"; // Handle millions and above gracefully if needed
+                }
+            }
+            return result;
+        }
+
+        function getThaiNum(num) {
+            const thaiDigits = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+            // ดึงรูปแบบที่มีคอมมามาเลย (เช่น "1,234")
+            let str = num.toLocaleString('en-US'); 
+            let result = '';
+            for(let i=0; i<str.length; i++) {
+                if(str[i] === ',') {
+                    result += ',';
+                } else {
+                    result += thaiDigits[parseInt(str[i])];
+                }
+            }
+            return result;
+        }
+
+        function getArabicNum(num) {
+            return num.toLocaleString('en-US');
+        }
+
+        // --- Game State ---
+        let currentData = [];
+        let shuffledCol1 = [];
+        let shuffledCol2 = [];
+        let shuffledCol3 = [];
+        let selectedCards = { col1: null, col2: null, col3: null };
+        let matchedCount = 0;
+
+        // --- Game Initialization ---
+
+        function generateData() {
+            const count = parseInt(document.getElementById('itemCount').value);
+            const maxNum = parseInt(document.getElementById('maxNumber').value);
+            
+            let data = [];
+            let usedNums = new Set();
+            
+            while(data.length < count) {
+                // Ensure variation, not just tiny numbers if max is large
+                let num = Math.floor(Math.random() * maxNum) + 1; 
+                
+                if(!usedNums.has(num)) {
+                    usedNums.add(num);
+                    data.push({
+                        id: num,
+                        arabic: getArabicNum(num),
+                        thaiNum: getThaiNum(num),
+                        thaiWord: getThaiWord(num)
+                    });
+                }
+            }
+            return data;
+        }
+
+        function shuffleArray(array) {
+            let newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function startGame() {
+            // Reset states
+            currentData = generateData();
+            shuffledCol1 = shuffleArray(currentData);
+            shuffledCol2 = shuffleArray(currentData);
+            shuffledCol3 = shuffleArray(currentData);
+            selectedCards = { col1: null, col2: null, col3: null };
+            matchedCount = 0;
+            
+            document.getElementById('successMessage').classList.add('hidden');
+            clearConfetti();
+            
+            renderGame();
+        }
+
+        function renderGame() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = '';
+
+            const createColumn = (dataArr, key, colId, title) => {
+                let html = `<div class="flex flex-col gap-3">
+                                <div class="bg-green-600 text-white text-center py-3 rounded-t-lg font-semibold shadow-sm">
+                                    ${title}
+                                </div>
+                                <div class="flex flex-col gap-3 bg-white p-4 rounded-b-lg shadow-sm h-full">`;
+                
+                dataArr.forEach(item => {
+                    html += `
+                        <div class="card border-2 border-gray-200 rounded-lg p-4 text-center font-medium text-xl bg-gray-50 flex items-center justify-center min-h-[80px]" 
+                             data-id="${item.id}" 
+                             data-col="${colId}"
+                             onclick="selectCard(this)">
+                            ${item[key]}
+                        </div>`;
+                });
+                
+                html += `   </div>
+                          </div>`;
+                return html;
+            };
+
+            gameArea.innerHTML += createColumn(shuffledCol1, 'arabic', 'col1', 'ตัวเลขฮินดูอารบิก');
+            gameArea.innerHTML += createColumn(shuffledCol2, 'thaiNum', 'col2', 'ตัวเลขไทย');
+            gameArea.innerHTML += createColumn(shuffledCol3, 'thaiWord', 'col3', 'ตัวหนังสือ');
+        }
+
+        // --- Interaction Logic ---
+
+        function selectCard(element) {
+            if (element.classList.contains('matched')) return;
+
+            const col = element.dataset.col;
+            
+            // Deselect if clicking the same selected element
+            if (selectedCards[col] === element) {
+                element.classList.remove('selected');
+                selectedCards[col] = null;
+                return;
+            }
+
+            // Remove selected class from previously selected in this column
+            if (selectedCards[col]) {
+                selectedCards[col].classList.remove('selected');
+                selectedCards[col].classList.remove('error');
+            }
+
+            // Select new element
+            element.classList.add('selected');
+            selectedCards[col] = element;
+
+            // Check if all 3 columns have a selection
+            if (selectedCards.col1 && selectedCards.col2 && selectedCards.col3) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const id1 = selectedCards.col1.dataset.id;
+            const id2 = selectedCards.col2.dataset.id;
+            const id3 = selectedCards.col3.dataset.id;
+
+            if (id1 === id2 && id2 === id3) {
+                // Correct Match
+                ['col1', 'col2', 'col3'].forEach(col => {
+                    selectedCards[col].classList.remove('selected');
+                    selectedCards[col].classList.add('matched');
+                });
+                
+                matchedCount++;
+                selectedCards = { col1: null, col2: null, col3: null };
+
+                if (matchedCount === currentData.length) {
+                    showSuccess();
+                }
+            } else {
+                // Wrong Match
+                ['col1', 'col2', 'col3'].forEach(col => {
+                    selectedCards[col].classList.add('error');
+                });
+
+                // Briefly disable clicks
+                document.getElementById('gameArea').style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    ['col1', 'col2', 'col3'].forEach(col => {
+                        if(selectedCards[col]) {
+                            selectedCards[col].classList.remove('selected');
+                            selectedCards[col].classList.remove('error');
+                        }
+                    });
+                    selectedCards = { col1: null, col2: null, col3: null };
+                    document.getElementById('gameArea').style.pointerEvents = 'auto';
+                }, 600);
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('successMessage').classList.remove('hidden');
+            createConfetti();
+        }
+
+        // --- Confetti Effect ---
+        let confettiElements = [];
+        function createConfetti() {
+            const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(confetti);
+                confettiElements.push(confetti);
+            }
+        }
+        function clearConfetti() {
+            confettiElements.forEach(el => el.remove());
+            confettiElements = [];
+        }
+
+        // --- Word Export Logic ---
+
+        function exportToWord() {
+            if (currentData.length === 0) startGame();
+
+            // Word requires specific markup to maintain formatting
+            const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='utf-8'>
+                <title>ใบงานคณิตศาสตร์</title>
+                <style>
+                    body { font-family: 'TH Sarabun PSK', 'Cordia New', sans-serif; }
+                    .center { text-align: center; }
+                    .table-worksheet { width: 100%; text-align: center; margin-top: 20px; }
+                    .table-worksheet td { padding: 25px 10px; font-size: 20pt; font-weight: bold; }
+                    .table-answer { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center; }
+                    .table-answer th, .table-answer td { border: 1px solid #000; padding: 12px; font-size: 18pt; }
+                    .table-answer th { background-color: #f0f0f0; }
+                </style>
+            </head>
+            <body>`;
+            
+            const postHtml = "</body></html>";
+
+            // --- PAGE 1: Worksheet ---
+            let html = `
+                <div class='center'>
+                    <h1 style='font-size: 26pt; margin-bottom: 0;'>ใบงานคณิตศาสตร์</h1>
+                    <h2 style='font-size: 20pt; margin-top: 5px; font-weight: normal;'>เรื่อง การเขียนตัวเลขฮินดูอารบิก ตัวเลขไทย และตัวหนังสือ</h2>
+                </div>
+                <p style='font-size: 18pt;'><b>ชื่อ - สกุล</b> ____________________________________ <b>ชั้น</b> _______ <b>เลขที่</b> _______</p>
+                <p style='font-size: 18pt;'><b>คำชี้แจง:</b> ให้โยงเส้นจับคู่ตัวเลขฮินดูอารบิก ตัวเลขไทย และตัวหนังสือที่แสดงจำนวนเดียวกันให้ถูกต้อง</p>
+                
+                <table class='table-worksheet' border='0'>
+                    <tr>
+                        <td style='width: 33%; font-size: 18pt;'><b>ฮินดูอารบิก</b></td>
+                        <td style='width: 33%; font-size: 18pt;'><b>ตัวเลขไทย</b></td>
+                        <td style='width: 33%; font-size: 18pt;'><b>ตัวหนังสือ</b></td>
+                    </tr>
+            `;
+
+            // Mix up the columns for the worksheet so they have to draw lines
+            const wsCol1 = [...shuffledCol1];
+            const wsCol2 = [...shuffledCol2];
+            const wsCol3 = [...shuffledCol3];
+
+            for(let i=0; i<currentData.length; i++) {
+                html += `
+                    <tr>
+                        <td>${wsCol1[i].arabic}</td>
+                        <td>${wsCol2[i].thaiNum}</td>
+                        <td>${wsCol3[i].thaiWord}</td>
+                    </tr>
+                `;
+            }
+            html += `</table>`;
+
+            // Page Break
+            html += `<br clear='all' style='page-break-before:always' />`;
+
+            // --- PAGE 2: Answer Key ---
+            html += `
+                <div class='center'>
+                    <h1 style='font-size: 26pt;'>เฉลยใบงานคณิตศาสตร์</h1>
+                </div>
+                <table class='table-answer'>
+                    <tr>
+                        <th style='width: 33%;'>ตัวเลขฮินดูอารบิก</th>
+                        <th style='width: 33%;'>ตัวเลขไทย</th>
+                        <th style='width: 33%;'>ตัวหนังสือ</th>
+                    </tr>
+            `;
+
+            // Output correct sorted order for answers
+            for(let i=0; i<currentData.length; i++) {
+                html += `
+                    <tr>
+                        <td>${currentData[i].arabic}</td>
+                        <td>${currentData[i].thaiNum}</td>
+                        <td>${currentData[i].thaiWord}</td>
+                    </tr>
+                `;
+            }
+            html += `</table>`;
+
+            const finalHtml = preHtml + html + postHtml;
+
+            // Create Blob and trigger download
+            const blob = new Blob(['\ufeff', finalHtml], {
+                type: 'application/msword'
+            });
+            const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(finalHtml);
+            const downloadLink = document.createElement("a");
+
+            document.body.appendChild(downloadLink);
+
+            if(navigator.msSaveOrOpenBlob){
+                navigator.msSaveOrOpenBlob(blob, 'ใบงานจับคู่ตัวเลข_พร้อมเฉลย.doc');
+            } else {
+                downloadLink.href = url;
+                downloadLink.download = 'ใบงานจับคู่ตัวเลข_พร้อมเฉลย.doc';
+                downloadLink.click();
+            }
+            document.body.removeChild(downloadLink);
+        }
+
+        // Init game on load
+        window.onload = startGame;
+    </script>
+</body>
+</html>
