@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบฝึกหัด ตัวเลขไทยและอารบิก</title>
+  
+  <!-- โหลด Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- โหลด Lucide Icons สำหรับไอคอนต่างๆ -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- โหลด html2pdf สำหรับบันทึก PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Sarabun', sans-serif;
+    }
+    
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white !important;
+      }
+      @page {
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <div class="min-h-screen py-8 px-4 print:py-0 print:px-0">
+    <div id="worksheet-content" class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-gray-200 print:border-none print:shadow-none print:rounded-none">
+      
+      <!-- Header Section -->
+      <div class="relative bg-red-50 p-8 text-center border-b-4 border-gray-200 print:bg-red-50 print:border-gray-800">
+        <div class="absolute top-4 left-4 text-orange-400">
+          <i data-lucide="sun" width="48" height="48" class="animate-[spin_4s_linear_infinite]"></i>
+        </div>
+        <div class="absolute top-6 right-8 text-blue-300">
+          <i data-lucide="cloud" width="56" height="56"></i>
+        </div>
+        
+        <h1 class="text-4xl font-bold text-red-600 mb-4 tracking-wide print:text-red-600">การบ้าน</h1>
+        <h2 class="text-xl font-semibold text-gray-700 leading-relaxed max-w-2xl mx-auto">
+          การอ่าน การเขียนตัวเลขฮินดูอารบิก<br/>
+          ตัวเลขไทย และตัวหนังสือแสดงจำนวน
+        </h2>
+        <p class="mt-4 text-sm font-medium text-gray-500 bg-white inline-block px-4 py-1 rounded-full shadow-sm border border-gray-100 print:shadow-none print:border-gray-300">
+          ให้นักเรียนเติมคำตอบในช่องว่างให้สมบูรณ์
+        </p>
+      </div>
+
+      <!-- Table Section -->
+      <div class="p-6 md:p-10 bg-[url('https://www.transparenttextures.com/patterns/notebook.png')] bg-repeat print:bg-transparent">
+        
+        <!-- View Tabs -->
+        <div class="flex justify-center mb-6 print:hidden" data-html2canvas-ignore="true">
+          <div class="bg-gray-200 p-1 rounded-full flex flex-wrap justify-center gap-1" id="tabs-container">
+            <!-- สร้าง Tab ด้วย JavaScript -->
+          </div>
+        </div>
+
+        <div class="overflow-x-auto print:overflow-visible">
+          <table class="w-full border-collapse border-4 border-gray-800 bg-white shadow-sm rounded-lg overflow-hidden print:shadow-none print:rounded-none">
+            <thead id="table-head">
+              <!-- สร้าง Header ด้วย JavaScript -->
+            </thead>
+            <tbody id="table-body">
+              <!-- สร้าง Row ด้วย JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ปุ่ม Actions - ซ่อนเมื่อพิมพ์ และซ่อนใน PDF -->
+        <div data-html2canvas-ignore="true" class="mt-8 flex justify-center gap-4 print:hidden flex-wrap">
+          <button onclick="addRow()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <span>+ เพิ่มข้อใหม่</span>
+          </button>
+          
+          <button onclick="handlePrint()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <i data-lucide="printer" width="20" height="20"></i>
+            <span>ดาวน์โหลดเป็น PDF</span>
+          </button>
+
+          <button onclick="handleExportWord()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <i data-lucide="file-text" width="20" height="20"></i>
+            <span>ดาวน์โหลดเป็น Word</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Decorations -->
+      <div class="bg-gray-50 p-8 border-t-4 border-gray-200 relative overflow-hidden flex justify-between items-end min-h-[150px] print:bg-white print:border-gray-800">
+        <div class="flex gap-2 text-gray-400 absolute top-4 left-1/2 transform -translate-x-1/2">
+           <i data-lucide="star" width="24" height="24" class="animate-pulse print:animate-none"></i>
+           <i data-lucide="star" width="32" height="32" class="animate-pulse delay-100 print:animate-none" style="animation-delay: 100ms;"></i>
+           <i data-lucide="star" width="24" height="24" class="animate-pulse delay-200 print:animate-none" style="animation-delay: 200ms;"></i>
+        </div>
+        
+        <div class="text-gray-700 flex flex-col items-center">
+          <i data-lucide="train" width="64" height="64" stroke-width="1.5" class="mb-2 text-indigo-600"></i>
+          <div class="w-full border-b-2 border-dashed border-gray-400 h-2"></div>
+        </div>
+        
+        <div class="w-1/2 flex items-end">
+           <div class="w-full text-right text-gray-600 font-medium text-lg print:text-black">
+              ชื่อ.................................................................ชั้น................เลขที่..............
+           </div>
+        </div>
+
+        <div class="text-gray-700 flex flex-col items-center">
+          <i data-lucide="car-front" width="64" height="64" stroke-width="1.5" class="mb-2 text-emerald-600"></i>
+           <div class="w-full border-b-2 border-dashed border-gray-400 h-2"></div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    // --- ฟังก์ชันหลักสำหรับการประมวลผลตัวเลข ---
+    const arabicToThaiNum = (numStr) => {
+      if (!numStr) return '';
+      const thaiNums = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+      return numStr.toString().replace(/[0-9]/g, (match) => thaiNums[match]);
+    };
+
+    const numToThaiText = (numStr) => {
+      if (!numStr || isNaN(numStr.replace(/,/g, ''))) return '';
+      
+      const num = parseInt(numStr.replace(/,/g, ''), 10);
+      if (num === 0) return 'ศูนย์';
+      if (num < 0) return 'ติดลบ' + numToThaiText(Math.abs(num).toString());
+
+      const str = num.toString();
+      const digits = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+      const places = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+      
+      let result = '';
+      let len = str.length;
+
+      for (let i = 0; i < len; i++) {
+        let d = parseInt(str[i], 10);
+        let placeIndex = len - 1 - i;
+
+        let effectivePlaceIndex = placeIndex % 6;
+        if (placeIndex > 0 && placeIndex % 6 === 0) {
+            effectivePlaceIndex = 6;
+        }
+
+        if (d !== 0) {
+          if (effectivePlaceIndex === 1 && d === 1) {
+            result += 'สิบ';
+          } else if (effectivePlaceIndex === 1 && d === 2) {
+            result += 'ยี่สิบ';
+          } else if (effectivePlaceIndex === 0 && d === 1 && (len > 1 && str[i-1] !== '0')) {
+            result += 'เอ็ด';
+          } else {
+            result += digits[d] + places[effectivePlaceIndex];
+          }
+        } else if (effectivePlaceIndex === 6 && placeIndex > 0) {
+          result += 'ล้าน';
+        }
+      }
+      return result;
+    };
+
+    const formatNumber = (numStr) => {
+      if (!numStr) return '';
+      const cleanNum = numStr.toString().replace(/,/g, '');
+      if (isNaN(cleanNum)) return numStr;
+      return Number(cleanNum).toLocaleString('en-US');
+    };
+
+    // --- State ของ Application ---
+    let activeView = 'all';
+    let rows = [
+      { val: '511', showArabic: true, showThai: true, showText: true },
+      { val: '237', showArabic: true, showThai: true, showText: true },
+      { val: '361', showArabic: true, showThai: true, showText: true },
+      { val: '478', showArabic: true, showThai: true, showText: true },
+      { val: '692', showArabic: true, showThai: true, showText: true },
+      { val: '674', showArabic: true, showThai: true, showText: true },
+      { val: '736', showArabic: true, showThai: true, showText: true },
+      { val: '893', showArabic: true, showThai: true, showText: true },
+      { val: '984', showArabic: true, showThai: true, showText: true },
+      { val: '1000', showArabic: true, showThai: true, showText: true }
+    ];
+
+    // --- ระบบจำตำแหน่ง Focus เวลาพิมพ์ (เพื่อไม่ให้หลุดเวลา Re-render) ---
+    let activeElementId = null;
+    let selectionStart = 0;
+    let selectionEnd = 0;
+
+    function storeFocus() {
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+        activeElementId = document.activeElement.id;
+        selectionStart = document.activeElement.selectionStart;
+        selectionEnd = document.activeElement.selectionEnd;
+      } else {
+        activeElementId = null;
+      }
+    }
+
+    function restoreFocus() {
+      if (activeElementId) {
+        const el = document.getElementById(activeElementId);
+        if (el) {
+          el.focus();
+          el.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
+    }
+
+    // --- ฟังก์ชัน Action ต่างๆ ---
+    const handleInputChange = (index, el) => {
+      const cleanValue = el.value.replace(/[^0-9]/g, '');
+      rows[index].val = cleanValue;
+      renderApp();
+    };
+
+    const addRow = () => {
+      rows.push({ val: '', showArabic: true, showThai: true, showText: true });
+      renderApp();
+    };
+
+    const removeRow = (index) => {
+      rows.splice(index, 1);
+      renderApp();
+    };
+
+    const toggleRow = (index) => {
+      const row = rows[index];
+      const allShown = row.showArabic && row.showThai && row.showText;
+      row.showArabic = !allShown;
+      row.showThai = !allShown;
+      row.showText = !allShown;
+      renderApp();
+    };
+
+    const toggleCell = (index, colName) => {
+      rows[index][colName] = !rows[index][colName];
+      renderApp();
+    };
+
+    const isColVisible = (colName) => rows.length > 0 && rows.every(r => r[colName]);
+    const toggleCol = (colName) => {
+      const newState = !isColVisible(colName);
+      rows = rows.map(r => ({ ...r, [colName]: newState }));
+      renderApp();
+    };
+
+    const setActiveView = (view) => {
+      activeView = view;
+      renderApp();
+    };
+
+    // --- ฟังก์ชันสำหรับการ Render หน้าจอ ---
+    const renderApp = () => {
+      storeFocus();
+      renderTabs();
+      renderTable();
+      lucide.createIcons(); // โหลดไอคอนใหม่ที่เพิ่งถูกสร้างขึ้นมาใน DOM
+      restoreFocus();
+    };
+
+    const renderTabs = () => {
+      const tabsContainer = document.getElementById('tabs-container');
+      const tabs = [
+        { id: 'all', label: 'แสดงทั้งหมด' },
+        { id: 'arabic', label: 'เฉพาะอารบิก' },
+        { id: 'thai', label: 'เฉพาะเลขไทย' },
+        { id: 'text', label: 'เฉพาะตัวหนังสือ' }
+      ];
+
+      tabsContainer.innerHTML = tabs.map(tab => {
+        const isActive = activeView === tab.id;
+        const baseClass = "px-4 md:px-6 py-2 rounded-full font-bold transition-all duration-200";
+        const activeClass = `${baseClass} bg-white shadow text-blue-600 scale-105`;
+        const inactiveClass = `${baseClass} text-gray-600 hover:bg-gray-300`;
+        
+        return `<button onclick="setActiveView('${tab.id}')" class="${isActive ? activeClass : inactiveClass}">${tab.label}</button>`;
+      }).join('');
+    };
+
+    const renderTable = () => {
+      const thead = document.getElementById('table-head');
+      const tbody = document.getElementById('table-body');
+
+      // --- สร้าง Header ---
+      let theadHTML = `<tr class="bg-gray-100 print:bg-gray-200">
+        <th class="border-2 border-gray-800 p-4 text-center w-12 md:w-16 font-bold text-lg">ข้อ</th>
+        <th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-1/5' : 'w-1/3'} font-bold text-lg">จำนวน</th>`;
+      
+      if (activeView === 'all' || activeView === 'arabic') {
+        const icon = isColVisible('showArabic') ? 'eye' : 'eye-off';
+        const title = isColVisible('showArabic') ? 'ซ่อนคอลัมน์นี้' : 'แสดงคอลัมน์นี้';
+        theadHTML += `<th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-1/5' : 'w-2/3'} font-bold text-lg relative pr-8">
+          ตัวเลขฮินดูอารบิก
+          <button onclick="toggleCol('showArabic')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 print:hidden" data-html2canvas-ignore="true" title="${title}">
+            <i data-lucide="${icon}" width="18" height="18"></i>
+          </button>
+        </th>`;
+      }
+      if (activeView === 'all' || activeView === 'thai') {
+        const icon = isColVisible('showThai') ? 'eye' : 'eye-off';
+        const title = isColVisible('showThai') ? 'ซ่อนคอลัมน์นี้' : 'แสดงคอลัมน์นี้';
+        theadHTML += `<th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-1/5' : 'w-2/3'} font-bold text-lg relative pr-8">
+          ตัวเลขไทย
+          <button onclick="toggleCol('showThai')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 print:hidden" data-html2canvas-ignore="true" title="${title}">
+            <i data-lucide="${icon}" width="18" height="18"></i>
+          </button>
+        </th>`;
+      }
+      if (activeView === 'all' || activeView === 'text') {
+        const icon = isColVisible('showText') ? 'eye' : 'eye-off';
+        const title = isColVisible('showText') ? 'ซ่อนคอลัมน์นี้' : 'แสดงคอลัมน์นี้';
+        theadHTML += `<th class="border-2 border-gray-800 p-4 text-center ${activeView === 'all' ? 'w-2/5' : 'w-2/3'} font-bold text-lg relative pr-8">
+          ตัวหนังสือ
+          <button onclick="toggleCol('showText')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700 print:hidden" data-html2canvas-ignore="true" title="${title}">
+            <i data-lucide="${icon}" width="18" height="18"></i>
+          </button>
+        </th>`;
+      }
+      
+      theadHTML += `<th data-html2canvas-ignore="true" class="border-2 border-gray-800 p-2 text-center w-24 bg-gray-50 print:hidden"></th></tr>`;
+      thead.innerHTML = theadHTML;
+
+      // --- สร้าง Body ---
+      let tbodyHTML = rows.map((row, index) => {
+        const formattedNum = formatNumber(row.val);
+        const thaiNum = arabicToThaiNum(formattedNum);
+        const thaiText = numToThaiText(row.val);
+
+        let tr = `<tr class="hover:bg-yellow-50 transition-colors duration-150 print:hover:bg-transparent">
+          <td class="border-2 border-gray-800 p-2 text-center font-bold text-lg text-gray-700 print:text-black">
+            ${index + 1}
+          </td>
+          <td class="border-2 border-gray-800 p-2 text-center">
+            <input type="text" id="input-${index}" value="${row.val}" oninput="handleInputChange(${index}, this)" placeholder="..." class="w-full p-2 text-center text-lg font-bold bg-transparent border-b-2 border-dashed border-gray-300 focus:outline-none focus:border-blue-500 transition-colors print:border-none print:p-0 print:placeholder-transparent" />
+          </td>`;
+        
+        if (activeView === 'all' || activeView === 'arabic') {
+          const icon = row.showArabic ? 'eye' : 'eye-off';
+          tr += `<td class="border-2 border-gray-800 p-3 relative group">
+            <div class="text-center text-xl font-bold text-red-600 print:text-red-600">${row.showArabic ? formattedNum : '...'}</div>
+            <button onclick="toggleCell(${index}, 'showArabic')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-blue-500 opacity-40 group-hover:opacity-100 transition-opacity print:hidden" data-html2canvas-ignore="true">
+              <i data-lucide="${icon}" width="16" height="16"></i>
+            </button>
+          </td>`;
+        }
+        if (activeView === 'all' || activeView === 'thai') {
+          const icon = row.showThai ? 'eye' : 'eye-off';
+          tr += `<td class="border-2 border-gray-800 p-3 relative group">
+            <div class="text-center text-2xl font-bold text-red-600 print:text-red-600">${row.showThai ? thaiNum : '...'}</div>
+            <button onclick="toggleCell(${index}, 'showThai')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-blue-500 opacity-40 group-hover:opacity-100 transition-opacity print:hidden" data-html2canvas-ignore="true">
+              <i data-lucide="${icon}" width="16" height="16"></i>
+            </button>
+          </td>`;
+        }
+        if (activeView === 'all' || activeView === 'text') {
+          const icon = row.showText ? 'eye' : 'eye-off';
+          tr += `<td class="border-2 border-gray-800 p-3 relative group">
+            <div class="text-center text-xl font-bold text-red-600 print:text-red-600">${row.showText ? thaiText : '...'}</div>
+            <button onclick="toggleCell(${index}, 'showText')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-blue-500 opacity-40 group-hover:opacity-100 transition-opacity print:hidden" data-html2canvas-ignore="true">
+              <i data-lucide="${icon}" width="16" height="16"></i>
+            </button>
+          </td>`;
+        }
+
+        const allShown = row.showArabic && row.showThai && row.showText;
+        const rowIcon = allShown ? 'eye' : 'eye-off';
+        const rowTitle = allShown ? 'ซ่อนทั้งแถว' : 'แสดงทั้งแถว';
+        tr += `<td data-html2canvas-ignore="true" class="border-2 border-gray-800 p-2 bg-gray-50 print:hidden">
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="toggleRow(${index})" class="text-gray-400 hover:text-blue-600 font-bold p-1 rounded transition-colors" title="${rowTitle}">
+                <i data-lucide="${rowIcon}" width="18" height="18"></i>
+              </button>
+              <button onclick="removeRow(${index})" class="text-gray-400 hover:text-red-500 font-bold p-1 rounded transition-colors" title="ลบแถว">✕</button>
+            </div>
+          </td>
+        </tr>`;
+
+        return tr;
+      }).join('');
+      
+      tbody.innerHTML = tbodyHTML;
+    };
+
+    // --- ฟังก์ชันสำหรับการส่งออก (Export) ---
+    const handlePrint = () => {
+      const content = document.getElementById('worksheet-content');
+      if (window.html2pdf && content) {
+        const opt = {
+          margin:       [10, 10, 10, 10], // top, left, bottom, right
+          filename:     'แบบฝึกหัด_ตัวเลขไทยและอารบิก.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        window.html2pdf().set(opt).from(content).save();
+      } else {
+        window.print(); // Fallback ไปพิมพ์ปกติ
+      }
+    };
+
+    const handleExportWord = () => {
+      const content = document.getElementById('worksheet-content');
+      if (!content) return;
+
+      const clone = content.cloneNode(true);
+      const inputs = clone.querySelectorAll('input');
+      
+      inputs.forEach(input => {
+        const textNode = document.createTextNode(input.value || '...');
+        const span = document.createElement('span');
+        span.style.fontWeight = 'bold';
+        span.appendChild(textNode);
+        input.parentNode.replaceChild(span, input);
+      });
+
+      const ignoredElements = clone.querySelectorAll('[data-html2canvas-ignore="true"]');
+      ignoredElements.forEach(el => el.remove());
+
+      const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>แบบฝึกหัด_ตัวเลขไทยและอารบิก</title>
+        <style>
+          body { font-family: 'Sarabun', 'Cordia New', sans-serif; }
+          table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+          th, td { border: 1px solid black; padding: 10px; text-align: center; font-size: 16pt; }
+          th { background-color: #f3f4f6; font-weight: bold; }
+          h1 { color: #dc2626; text-align: center; font-size: 24pt; }
+          h2 { text-align: center; font-size: 18pt; color: #374151; }
+        </style>
+      </head><body>`;
+      const footer = "</body></html>";
+      
+      const sourceHTML = header + clone.innerHTML + footer;
+      
+      // ใส่ BOM (\ufeff) เพื่อให้รองรับภาษาไทยใน Microsoft Word
+      const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'แบบฝึกหัด_ตัวเลขไทยและอารบิก.doc';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
+    // --- สั่งเริ่มทำงานเมื่อเปิดหน้าเว็บ ---
+    window.onload = renderApp;
+  </script>
+</body>
+</html>
