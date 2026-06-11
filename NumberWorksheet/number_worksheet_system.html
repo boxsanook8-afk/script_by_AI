@@ -494,6 +494,46 @@
       const placeholders = clone.querySelectorAll('.input-placeholder-dots');
       placeholders.forEach(el => el.remove());
 
+      // --- สร้างหน้าเฉลย (Answer Key) ---
+      let answerKeyHTML = `
+        <br clear=all style='mso-special-character:line-break;page-break-before:always'>
+        <div style="text-align: center; margin-top: 40px; padding: 40px 0;">
+          <h1 style="color: #dc2626; font-size: 24pt; font-weight: bold; margin-bottom: 10px;">เฉลยการบ้าน</h1>
+          <h2 style="color: #374151; font-size: 18pt; margin-top: 0;">การอ่าน การเขียนตัวเลขฮินดูอารบิก ตัวเลขไทย และตัวหนังสือแสดงจำนวน</h2>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ข้อ</th>
+              <th>จำนวน</th>
+              <th>ตัวเลขฮินดูอารบิก</th>
+              <th>ตัวเลขไทย</th>
+              <th>ตัวหนังสือ</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      rows.forEach((row, index) => {
+        const formattedNum = formatNumber(row.val);
+        const thaiNum = arabicToThaiNum(formattedNum);
+        const thaiText = numToThaiText(row.val);
+        answerKeyHTML += `
+            <tr>
+              <td>${index + 1}</td>
+              <td><b>${row.val || '-'}</b></td>
+              <td style="color: #dc2626; font-weight: bold;">${formattedNum || '-'}</td>
+              <td style="color: #dc2626; font-weight: bold;">${thaiNum || '-'}</td>
+              <td style="color: #dc2626; font-weight: bold;">${thaiText || '-'}</td>
+            </tr>
+        `;
+      });
+
+      answerKeyHTML += `
+          </tbody>
+        </table>
+      `;
+
       const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
         <meta charset='utf-8'>
@@ -503,13 +543,14 @@
           table { border-collapse: collapse; width: 100%; margin-top: 20px; }
           th, td { border: 1px solid black; padding: 10px; text-align: center; font-size: 16pt; }
           th { background-color: #f3f4f6; font-weight: bold; }
-          h1 { color: #dc2626; text-align: center; font-size: 24pt; }
-          h2 { text-align: center; font-size: 18pt; color: #374151; }
+          h1 { color: #dc2626; text-align: center; font-size: 24pt; margin-bottom: 10px; }
+          h2 { text-align: center; font-size: 18pt; color: #374151; margin-top: 0; }
         </style>
       </head><body>`;
       const footer = "</body></html>";
       
-      const sourceHTML = header + clone.innerHTML + footer;
+      // รวมหน้าแบบฝึกหัด และ หน้าเฉลย เข้าด้วยกัน
+      const sourceHTML = header + clone.innerHTML + answerKeyHTML + footer;
       
       // ใส่ BOM (\ufeff) เพื่อให้รองรับภาษาไทยใน Microsoft Word
       const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
