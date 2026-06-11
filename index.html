@@ -84,9 +84,9 @@
             <div class="flex items-start justify-between p-3 rounded hover:bg-gray-50">
               <div>
                 <div class="text-lg font-bold text-gray-800">NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก</div>
-                <div class="text-sm text-gray-500">หน้าเว็บสำหรับสร้างแผ่นงานตัวเลข สามารถสุ่มตัวเลขและส่งออกเป็น PDF/Word</div>
+                <div class="text-sm text-gray-500">หน้าเว็บสำหรับสร้างแผ่นงานตัวเลข สามารถสุ่มตัวเลขและดาวน์โหลดใบงานเป็นไฟล์ .doc</div>
                 <div class="mt-2 text-sm text-gray-500">
-                  <a href="#" onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')" class="underline hover:text-indigo-600">เปิดหน้าโปรเจกต์</a>
+                  <a href="#" onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')">เปิดโปรเจกต์</a>
                 </div>
               </div>
 
@@ -101,6 +101,27 @@
             </div>
           </li>
 
+          <li>
+            <div class="flex items-start justify-between p-3 rounded hover:bg-gray-50">
+              <div>
+                <div class="text-lg font-bold text-gray-800">เกมจับคู่ตัวเลข</div>
+                <div class="text-sm text-gray-500">เกมจับคู่ตัวเลขที่แสดงตัวเลขใน 3 รูปแบบ: ฮินดู-อารบิก, ตัวเลขไทย, และคำอ่าน (ภาษาไทย) พร้อมฟีเจอร์สร้างเกมใหม่และดาวน์โหลดใบงานพร้อมเฉลย</div>
+                <div class="mt-2 text-sm text-gray-500">
+                  <a href="#" onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')">เปิดโปรเจกต์</a>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end gap-2">
+                <button onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')" class="inline-block bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">เปิด</button>
+                <button onclick="openReadme('เกมจับคู่ตัวเลข/README.md','เกมจับคู่ตัวเลข')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">README</button>
+              </div>
+            </div>
+            <div class="mt-2 text-sm text-gray-500 ml-3">
+              <span class="text-xs text-gray-400">ไฟล์:</span>
+              <a href="เกมจับคู่ตัวเลข/README.md" class="underline hover:text-indigo-600">เกมจับคู่ตัวเลข/README.md</a>
+            </div>
+          </li>
+
           <!-- เพิ่มเมนูโปรเจกต์อื่นที่ต้องการได้ที่นี่ -->
         </ul>
       </div>
@@ -109,8 +130,8 @@
     <section id="about">
       <h2 class="text-xl font-semibold mb-3">เกี่ยวกับ</h2>
       <div class="bg-white border rounded-lg p-4 shadow-sm text-gray-700">
-        <p>รีโพสนี้เก็บตัวอย่างไฟล์ HTML ที่สร้างโดย AI เพื่อให้ครูและนักพัฒนานำไปใช้งานหรือปรับแต่งต่อได้ง่าย ๆ</p>
-        <p class="mt-2 text-sm text-gray-500">หากต้องการเพิ่มโปรเจกต์ใหม่ ให้สร้างโฟลเดอร์ใหม่แล้ววางไฟล์ HTML จากนั้นแก้ไข index.html นี้เพื่อเชื่อมเมนู</p>
+        <p>รีโพสนี้เก็บตัวอย่างไฟล์ HTML ที่สร้างโดย AI เพื่อให้ครูและนักพัฒนานำไปใช้งาน ปรับแก้ และแจกจ่ายตามที่ต้องการ</p>
+        <p class="mt-2 text-sm text-gray-500">หากต้องการเพิ่มโปรเจกต์ใหม่ ให้สร้างโฟลเดอร์ใหม่และเพิ่มไฟล์ HTML + README.md แล้วผมจะช่วยอัปเดตเมนูหน้าแรกให้</p>
         <div class="mt-3">
           <button onclick="openReadme('/README.md','README ของรีโป')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">ดู README ของรีโป</button>
         </div>
