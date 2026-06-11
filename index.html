@@ -9,11 +9,13 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    /* ทำให้ iframe เต็มพื้นที่ภายในคอนเทนเนอร์ */
+    #project-frame { width: 100%; height: calc(100vh - 80px); border: none; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen">
   <header class="bg-white shadow-md">
-    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-indigo-600">Script by AI</h1>
         <p class="text-sm text-gray-500">คลังโปรเจกต์โค้ด HTML ที่สร้างโดยปัญญาประดิษฐ์ (AI)</p>
@@ -28,7 +30,24 @@
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-6 py-8">
+  <!-- Top bar ที่ปรากฏเมื่อเปิดโปรเจกต์ใน iframe -->
+  <div id="project-topbar" class="hidden fixed inset-x-0 top-0 z-40 bg-white border-b shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="back-btn" onclick="closeProject()" class="bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">← กลับ</button>
+        <div>
+          <div id="project-title" class="font-semibold text-gray-800">โปรเจกต์</div>
+          <div id="project-sub" class="text-xs text-gray-500">กดปุ่ม "เปิดในแท็บใหม่" เพื่อดูไฟล์ในแท็บใหม่</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a id="open-new-tab" class="hidden inline-block bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700" target="_blank" rel="noopener">เปิดในแท็บใหม่</a>
+        <a id="open-raw-file" class="hidden text-sm text-indigo-600 underline" target="_blank" rel="noopener">ดูไฟล์</a>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content" class="max-w-6xl mx-auto px-6 py-8">
     <section id="projects" class="mb-8">
       <h2 class="text-xl font-semibold mb-3">เมนูโปรเจกต์</h2>
       <div class="bg-white border rounded-lg p-4 shadow-sm">
@@ -39,12 +58,12 @@
                 <div class="text-lg font-bold text-gray-800">NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก</div>
                 <div class="text-sm text-gray-500">หน้าเว็บสำหรับสร้างแผ่นงานตัวเลข สามารถสุ่มตัวเลขและส่งออกเป็น PDF/Word</div>
                 <div class="mt-2 text-sm text-gray-500">
-                  <a href="NumberWorksheet/number_worksheet_system.html" class="underline hover:text-indigo-600">เปิดหน้าโปรเจกต์</a>
+                  <a href="#" onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')" class="underline hover:text-indigo-600">เปิดหน้าโปรเจกต์</a>
                 </div>
               </div>
 
               <div class="flex flex-col items-end gap-2">
-                <a class="inline-block bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700" href="NumberWorksheet/number_worksheet_system.html">เปิด</a>
+                <button onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')" class="inline-block bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">เปิด</button>
                 <button onclick="openReadme('NumberWorksheet/README.md','NumberWorksheet')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">README</button>
               </div>
             </div>
@@ -68,8 +87,15 @@
     </section>
   </main>
 
+  <!-- คอนเทนเนอร์สำหรับ iframe โปรเจกต์ -->
+  <div id="project-container" class="hidden fixed inset-0 z-30 bg-white">
+    <div class="max-w-6xl mx-auto pt-16"> <!-- เว้นที่ให้ topbar -->
+      <iframe id="project-frame" src="" title="Project Viewer"></iframe>
+    </div>
+  </div>
+
   <footer class="border-t bg-white mt-12">
-    <div class="max-w-4xl mx-auto px-6 py-6 text-sm text-gray-500 flex justify-between items-center">
+    <div class="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500 flex justify-between items-center">
       <div>© 2026 boxsanook8-afk — Script by AI</div>
       <div>ภาษา: HTML</div>
     </div>
@@ -96,6 +122,7 @@
     const REPO = 'script_by_AI';
     const BRANCH = 'main';
 
+    // เปิด README modal (เดิม)
     function openReadme(path, title) {
       const modal = document.getElementById('readme-modal');
       const body = document.getElementById('modal-body');
@@ -150,8 +177,58 @@
 
     // ปิด modal เมื่อกด ESC
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeReadme();
+      if (e.key === 'Escape') {
+        closeReadme();
+      }
     });
+
+    // ---------------- functions สำหรับการเปิดโปรเจกต์ใน iframe ----------------
+    function openProject(path, title) {
+      const container = document.getElementById('project-container');
+      const topbar = document.getElementById('project-topbar');
+      const main = document.getElementById('main-content');
+      const frame = document.getElementById('project-frame');
+      const projectTitle = document.getElementById('project-title');
+      const openNewTab = document.getElementById('open-new-tab');
+      const openRaw = document.getElementById('open-raw-file');
+
+      // ตั้งค่า src ของ iframe เป็นพาธไฟล์ใน repo
+      frame.src = path;
+      projectTitle.textContent = title;
+
+      // ปรับลิงก์ปุ่ม
+      openNewTab.href = path;
+      openNewTab.classList.remove('hidden');
+      openRaw.href = path;
+      openRaw.classList.remove('hidden');
+
+      // แสดง topbar และ container iframe, ซ่อน main
+      topbar.classList.remove('hidden');
+      container.classList.remove('hidden');
+      main.classList.add('hidden');
+
+      // ให้ topbar มองเห็นได้
+      setTimeout(() => topbar.classList.add('visible'), 10);
+    }
+
+    function closeProject() {
+      const container = document.getElementById('project-container');
+      const topbar = document.getElementById('project-topbar');
+      const main = document.getElementById('main-content');
+      const frame = document.getElementById('project-frame');
+
+      // คืนสถานะหน้า
+      topbar.classList.add('hidden');
+      container.classList.add('hidden');
+      main.classList.remove('hidden');
+
+      // ล้าง iframe
+      frame.src = 'about:blank';
+
+      // ซ่อนปุ่มลิงก์
+      document.getElementById('open-new-tab').classList.add('hidden');
+      document.getElementById('open-raw-file').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
