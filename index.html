@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Script by AI — โปรเจกต์โค้ดจาก AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- marked สำหรับแปลง Markdown เป็น HTML ในฝั่งไคลเอนต์ -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- DOMPurify สำหรับ sanitize HTML ที่มาจาก Markdown (ป้องกัน XSS) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js" crossorigin="anonymous"></script>
-  <!-- GitHub Markdown CSS เพื่อให้การแสดง README คล้าย GitHub -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css" crossorigin="anonymous">
-  <!-- highlight.js สำหรับไฮไลท์โค้ดใน README -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
@@ -58,7 +54,6 @@
     </div>
   </header>
 
-  <!-- Top bar ที่ปรากฏเมื่อเปิดโปรเจกต์ใน iframe -->
   <div id="project-topbar" class="hidden fixed inset-x-0 top-0 z-40 bg-white border-b shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -80,18 +75,19 @@
       <h2 class="text-xl font-semibold mb-3">เมนูโปรเจกต์</h2>
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <ul class="space-y-3">
+          
           <li>
             <div class="flex items-start justify-between p-3 rounded hover:bg-gray-50">
               <div>
                 <div class="text-lg font-bold text-gray-800">NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก</div>
-                <div class="text-sm text-gray-500">หน้าเว็บสำหรับสร้างแผ่นงานตัวเลข สามารถสุ่มตัวเลขแ�[...]
+                <div class="text-sm text-gray-500">หน้าเว็บสำหรับสร้างแผ่นงานตัวเลข สามารถสุ่มตัวเลขและสั่งพิมพ์ได้</div>
                 <div class="mt-2 text-sm text-gray-500">
-                  <a href="#" onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิ��[...]
+                  <a href="#" onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')">เปิดโปรเจกต์</a>
                 </div>
               </div>
 
               <div class="flex flex-col items-end gap-2">
-                <button onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')" c[...]
+                <button onclick="openProject('NumberWorksheet/number_worksheet_system.html','NumberWorksheet — แบบฝึกหัด ตัวเลขไทยและอารบิก')" class="inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">เปิด</button>
                 <button onclick="openReadme('NumberWorksheet/README.md','NumberWorksheet')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">README</button>
               </div>
             </div>
@@ -105,15 +101,15 @@
             <div class="flex items-start justify-between p-3 rounded hover:bg-gray-50">
               <div>
                 <div class="text-lg font-bold text-gray-800">เกมจับคู่ตัวเลข</div>
-                <div class="text-sm text-gray-500">เกมจับคู่ตัวเลขที่แสดงตัวเลขใน 3 รูปแบบ: ฮินดู-อารบิก, [...]
+                <div class="text-sm text-gray-500">เกมจับคู่ตัวเลขที่แสดงตัวเลขใน 3 รูปแบบ: ฮินดู-อารบิก, ตัวเลขไทย และคำอ่าน</div>
                 <div class="mt-2 text-sm text-gray-500">
-                  <a href="#" onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')">เปิดโปรเจก��[...]
+                  <a href="#" onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')">เปิดโปรเจกต์</a>
                 </div>
               </div>
 
               <div class="flex flex-col items-end gap-2">
-                <button onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')" class="inline-block bg-indigo-600 text[...]
-                <button onclick="openReadme('เกมจับคู่ตัวเลข/README.md','เกมจับคู่ตัวเลข')" class="inline-block bg-gray-100 text-gray-800 px[...]
+                <button onclick="openProject('เกมจับคู่ตัวเลข/code_artifact.html','เกมจับคู่ตัวเลข')" class="inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">เปิด</button>
+                <button onclick="openReadme('เกมจับคู่ตัวเลข/README.md','เกมจับคู่ตัวเลข')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">README</button>
               </div>
             </div>
             <div class="mt-2 text-sm text-gray-500 ml-3">
@@ -142,11 +138,12 @@
               <a href="LuckyNumber/lucky-number.html" class="underline hover:text-indigo-600">LuckyNumber/lucky-number.html</a>
             </div>
           </li>
+
           <li>
             <div class="flex items-start justify-between p-3 rounded hover:bg-gray-50">
               <div>
                 <div class="text-lg font-bold text-gray-800">LUCKY NUMBER</div>
-                <div class="text-sm text-gray-500">เกมสุ่มตัวเลขตัวเลขที่แสดงตัวเลขใน 3 รูปแบบ: ฮินดู-อารบิก, [...]</div>
+                <div class="text-sm text-gray-500">เกมสุ่มตัวเลขที่แสดงผลใน 3 รูปแบบ: ฮินดู-อารบิก, ตัวเลขไทย และคำอ่าน</div>
                 <div class="mt-2 text-sm text-gray-500">
                   <a href="#" onclick="openProject('LUCKY NUMBER/LUCKY-NUMBER.html','LUCKY NUMBER')">เปิดโปรเจกต์</a>
                 </div>
@@ -162,7 +159,7 @@
               <a href="LUCKY NUMBER/LUCKY-NUMBER.html" class="underline hover:text-indigo-600">LUCKY NUMBER/LUCKY-NUMBER.html</a>
             </div>
           </li>
-          <!-- เพิ่มเมนูโปรเจกต์อื่นที่ต้องการได้ที่นี่ -->
+
         </ul>
       </div>
     </section>
@@ -170,19 +167,17 @@
     <section id="about">
       <h2 class="text-xl font-semibold mb-3">เกี่ยวกับ</h2>
       <div class="bg-white border rounded-lg p-4 shadow-sm text-gray-700">
-        <p>รีโพสนี้เก็บตัวอย่างไฟล์ HTML ที่สร้างโดย AI เพื่อให้ครูและนักพัฒนานำ��[...]
-        <p class="mt-2 text-sm text-gray-500">หากต้องการเพิ่มโปรเจกต์ใหม่ ให้สร้างโฟลเดอร์ใหม่และเ[...]
+        <p>รีโพสนี้เก็บตัวอย่างไฟล์ HTML ที่สร้างโดย AI เพื่อให้ครูและนักพัฒนานำไปประยุกต์ใช้งานได้สะดวกยิ่งขึ้น</p>
+        <p class="mt-2 text-sm text-gray-500">หากต้องการเพิ่มโปรเจกต์ใหม่ ให้สร้างโฟลเดอร์ใหม่และเพิ่มไฟล์ที่เกี่ยวข้องลงไป</p>
         <div class="mt-3">
-          <button onclick="openReadme('/README.md','README ของรีโป')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">ดู README ของร[...]
+          <button onclick="openReadme('/README.md','README ของรีโป')" class="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded hover:bg-gray-200 border">ดู README ของรีโป</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- คอนเทนเนอร์สำหรับ iframe โปรเจกต์ -->
   <div id="project-container" class="hidden fixed inset-0 z-30 bg-white">
-    <div class="max-w-6xl mx-auto pt-16"> <!-- เว้นที่ให้ topbar -->
-      <iframe id="project-frame" src="" title="Project Viewer"></iframe>
+    <div class="max-w-6xl mx-auto pt-16"> <iframe id="project-frame" src="" title="Project Viewer"></iframe>
     </div>
   </div>
 
@@ -193,7 +188,6 @@
     </div>
   </footer>
 
-  <!-- Modal สำหรับแสดง README -->
   <div id="readme-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 readme-modal-backdrop">
     <div class="relative bg-white readme-container">
       <div class="flex items-center justify-between px-4 py-3 border-b">
@@ -222,7 +216,6 @@
     const REPO = 'script_by_AI';
     const BRANCH = 'main';
 
-    // เปิด README modal (ปรับปรุงสวยขึ้น) - รองรับพาธขึ้นต้นด้วย '/'
     function openReadme(path, title) {
       const modal = document.getElementById('readme-modal');
       const body = document.getElementById('modal-body');
@@ -237,19 +230,15 @@
       error.classList.add('hidden');
       downloadLink.classList.add('hidden');
 
-      // รองรับพาธที่ขึ้นต้นด้วย / (หมายถึง root ของรีโป)
       const cleanedPath = path && path.startsWith('/') ? path.slice(1) : path;
-
       const rawUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${cleanedPath}`;
       rawLink.href = rawUrl;
       downloadLink.href = rawUrl;
       downloadLink.download = (title || 'README') + '.md';
 
-      // แสดง modal
       modal.classList.remove('hidden');
       modal.classList.add('flex');
 
-      // แสดง loading
       body.innerHTML = document.getElementById('modal-loading').outerHTML;
 
       fetch(rawUrl)
@@ -263,31 +252,24 @@
             body.innerHTML = '<div class="p-6 text-center text-gray-500">ยังไม่มี README สำหรับโปรเจกต์นี้</div>';
             return;
           }
-          // แปลง markdown เป็น HTML ด้วย marked แล้ว sanitize ด้วย DOMPurify
           try {
             let rawHtml = marked.parse(trimmed);
+            const basePath = cleanedPath.replace(/\/[^\/]*$/, ''); 
 
-            // แปลง relative URLs ของรูป/ลิงก์ ให้เป็น raw.githubusercontent (เพื่อให้แสดงเหมือน GitHub)
-            const basePath = cleanedPath.replace(/\/[^\/]*$/, ''); // ถ้า README อยู่ในโฟลเดอร์ เช่น NumberWorksheet/README.md -> basePath=NumberWorkshee[...]
-            if (basePath === cleanedPath) {
-              // ถ้าไม่มี / ในพาธ ให้ basePath เป็น empty string
-            }
-            // สร้าง temporary container เพื่อแก้ไข URLs
             const tmp = document.createElement('div');
             tmp.innerHTML = rawHtml;
 
-            // แปลง <img src="..."> และ <a href="..."> แบบ relative
             tmp.querySelectorAll('img').forEach(img => {
               const src = img.getAttribute('src') || '';
               if (src && !src.match(/^https?:|^\/\//) && !src.startsWith('data:')) {
-                const newSrc = `${'https://raw.githubusercontent.com/' + OWNER + '/' + REPO + '/' + BRANCH + '/'}${basePath ? basePath + '/' : ''}${src}`;
+                const newSrc = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${basePath ? basePath + '/' : ''}${src}`;
                 img.setAttribute('src', newSrc);
               }
             });
             tmp.querySelectorAll('a').forEach(a => {
               const href = a.getAttribute('href') || '';
               if (href && !href.match(/^https?:|^\/\//) && !href.startsWith('#') && !href.startsWith('mailto:')) {
-                const newHref = `${'https://github.com/' + OWNER + '/' + REPO + '/blob/' + BRANCH + '/'}${basePath ? basePath + '/' : ''}${href}`;
+                const newHref = `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${basePath ? basePath + '/' : ''}${href}`;
                 a.setAttribute('href', newHref);
                 a.setAttribute('target', '_blank');
                 a.setAttribute('rel', 'noopener');
@@ -300,7 +282,6 @@
             body.innerHTML = '<div class="markdown-body">' + safe + '</div>';
             downloadLink.classList.remove('hidden');
 
-            // ไฮไลท์โค้ดถ้ามี
             if (window.hljs && typeof hljs.highlightElement === 'function') {
               document.querySelectorAll('.markdown-body pre code').forEach((block) => hljs.highlightElement(block));
             }
@@ -327,14 +308,12 @@
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    // ปิด modal เมื่อกด ESC
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeReadme();
       }
     });
 
-    // ---------------- functions สำหรับการเปิดโปรเจกต์ใน iframe ----------------
     function openProject(path, title) {
       const container = document.getElementById('project-container');
       const topbar = document.getElementById('project-topbar');
@@ -344,22 +323,18 @@
       const openNewTab = document.getElementById('open-new-tab');
       const openRaw = document.getElementById('open-raw-file');
 
-      // ตั้งค่า src ของ iframe เป็นพาธไฟล์ใน repo
       frame.src = path;
       projectTitle.textContent = title;
 
-      // ปรับลิงก์ปุ่ม
       openNewTab.href = path;
       openNewTab.classList.remove('hidden');
       openRaw.href = path;
       openRaw.classList.remove('hidden');
 
-      // แสดง topbar และ container iframe, ซ่อน main
       topbar.classList.remove('hidden');
       container.classList.remove('hidden');
       main.classList.add('hidden');
 
-      // ให้ topbar มองเห็นได้
       setTimeout(() => topbar.classList.add('visible'), 10);
     }
 
@@ -369,15 +344,12 @@
       const main = document.getElementById('main-content');
       const frame = document.getElementById('project-frame');
 
-      // คืนสถานะหน้า
       topbar.classList.add('hidden');
       container.classList.add('hidden');
       main.classList.remove('hidden');
 
-      // ล้าง iframe
       frame.src = 'about:blank';
 
-      // ซ่อนปุ่มลิงก์
       document.getElementById('open-new-tab').classList.add('hidden');
       document.getElementById('open-raw-file').classList.add('hidden');
     }
