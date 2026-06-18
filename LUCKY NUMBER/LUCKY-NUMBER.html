@@ -19,12 +19,18 @@
       font-family: 'Share Tech Mono', monospace;
     }
 
-    /* เอฟเฟกต์ไฟกระพริบตอนสุ่มเสร็จ */
+    /* กำหนดตัวแปรควบคุมสีเริ่มต้น */
+    :root {
+      --winner-color: #f59e0b;
+    }
+
+    /* เอฟเฟกต์ไฟกระพริบตอนสุ่มเสร็จ ปรับเปลี่ยนสีตามที่กำหนดเอง */
     @keyframes pulse-gold {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.4)); }
-      50% { transform: scale(1.05); filter: drop-shadow(0 0 50px rgba(245, 158, 11, 0.8)); }
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--winner-color)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 50px var(--winner-color)); }
     }
     .winner-pulse {
+      color: var(--winner-color) !important;
       animation: pulse-gold 1.5s infinite;
     }
   </style>
@@ -87,7 +93,7 @@
       <!-- กล่องแสดงคำอ่านตัวอักษรภาษาไทยและอังกฤษที่ได้จากการแปลงค่า -->
       <div id="written-text-container" class="mt-6 p-4 bg-slate-950/40 border border-slate-800/80 rounded-2xl max-w-xl w-full text-center space-y-2 backdrop-blur-sm shadow-inner">
         <div class="text-xs text-slate-500 font-semibold tracking-wider uppercase">คำอ่านตัวหนังสือภาษาไทย</div>
-        <div id="thai-written-text" class="text-lg sm:text-xl font-bold text-amber-400">ศูนย์</div>
+        <div id="thai-written-text" class="text-lg sm:text-xl font-bold text-amber-400 transition-colors duration-300">ศูนย์</div>
         <div id="english-written-text" class="text-xs sm:text-sm text-slate-400 font-medium italic">Zero</div>
       </div>
 
@@ -151,6 +157,7 @@
     </div>
   </footer>
 
+  <!-- ================= STREAMING_CHUNK: Designing Settings Drawer... ================= -->
   <!-- ================= Drawer / Sidebar ตั้งค่าและการสุ่ม (Settings Modal) ================= -->
   <div id="settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-end transition-opacity duration-300 opacity-0 pointer-events-none">
     <!-- หน้าต่างตั้งค่าด้านขวา -->
@@ -216,7 +223,33 @@
           </div>
         </div>
 
-        <!-- 4. ตั้งค่าระบบเสียงและแหล่งกำเนิดเสียง -->
+        <!-- 4. กำหนดสีตัวอักษรผู้โชคดี (Color Customization Section) -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="palette" class="w-4 h-4"></i> สีของตัวเลขผู้โชคดี
+          </h3>
+          <div class="grid grid-cols-1 gap-3">
+            <!-- สีด่วนพรีเซ็ต -->
+            <div class="flex flex-wrap gap-2.5 items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #f59e0b;" data-color="#f59e0b" title="สีส้มทอง"></button>
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #10b981;" data-color="#10b981" title="สีเขียวมรกต"></button>
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #3b82f6;" data-color="#3b82f6" title="สีฟ้าสกาย"></button>
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #a855f7;" data-color="#a855f7" title="สีม่วงนีออน"></button>
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #ef4444;" data-color="#ef4444" title="สีแดงคริมสัน"></button>
+              <button type="button" class="color-preset-btn w-8 h-8 rounded-full border-2 border-transparent transition-all scale-100 hover:scale-110 active:scale-95 shadow-md" style="background-color: #f43f5e;" data-color="#f43f5e" title="สีชมพูโรส"></button>
+            </div>
+            <!-- เครื่องมือเลือกสีแบบกำหนดเอง -->
+            <div class="flex items-center justify-between bg-slate-950/40 px-3 py-2 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400">เลือกเฉดสีตามใจชอบ:</span>
+              <div class="flex items-center gap-2">
+                <input type="color" id="input-custom-color" value="#f59e0b" class="w-10 h-8 rounded bg-transparent border border-slate-700 cursor-pointer p-0.5">
+                <span id="label-custom-color" class="text-xs font-mono-num text-slate-300 uppercase">#F59E0B</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. ตั้งค่าระบบเสียงและแหล่งกำเนิดเสียง -->
         <div class="space-y-3 pt-3 border-t border-slate-800">
           <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
             <i data-lucide="volume-2" class="w-4 h-4"></i> แหล่งเสียงอ่านออกเสียง (TTS)
@@ -235,7 +268,7 @@
           </p>
         </div>
 
-        <!-- 5. ปรับความเร็วในการอ่านออกเสียงเพื่อเด็กและผู้เริ่มต้นฝึกฟัง -->
+        <!-- 6. ปรับความเร็วในการอ่านออกเสียงเพื่อเด็กและผู้เริ่มต้นฝึกฟัง -->
         <div class="space-y-3">
           <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
             <i data-lucide="gauge" class="w-4 h-4"></i> ความเร็วในการอ่านออกเสียง
@@ -253,7 +286,7 @@
           </div>
         </div>
 
-        <!-- 6. ตั้งค่าตัวเลือกอื่นๆ -->
+        <!-- 7. ตั้งค่าตัวเลือกอื่นๆ -->
         <div class="space-y-3 pt-3 border-t border-slate-800">
           <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
             <i data-lucide="shield-alert" class="w-4 h-4"></i> ตัวเลือกการทำงาน
@@ -278,7 +311,7 @@
           </div>
         </div>
 
-        <!-- 7. ประวัติการสุ่มล่าสุด -->
+        <!-- 8. ประวัติการสุ่มล่าสุด -->
         <div class="space-y-3 pt-4 border-t border-slate-800">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
@@ -418,7 +451,7 @@
     // ไอคอน Lucide
     lucide.createIcons();
 
-    // ================= ประกาศตัวแปรรับค่า Elements (ย้ายขึ้นด้านบนสุดเพื่อป้องกันปัญหา TDZ) =================
+    // ================= ประกาศตัวแปรรับค่า Elements =================
     const numberDisplayContainer = document.getElementById('number-display-container');
     const statusMessage = document.getElementById('status-message');
     const rollBtn = document.getElementById('roll-btn');
@@ -469,6 +502,11 @@
     const inputSpeechRate = document.getElementById('input-speech-rate');
     const labelSpeechRateVal = document.getElementById('label-speech-rate-val');
 
+    // Color Customization Elements
+    const colorPresetBtns = document.querySelectorAll('.color-preset-btn');
+    const inputCustomColor = document.getElementById('input-custom-color');
+    const labelCustomColor = document.getElementById('label-custom-color');
+
     // Stats Info Elements
     const infoRange = document.getElementById('info-range');
     const infoCount = document.getElementById('info-count');
@@ -488,9 +526,11 @@
       speechSource: 'online', // แหล่งเสียงหลัก: 'online' (เสถียรที่สุด) หรือ 'system' (ดึงเครื่อง)
       speechRate: 0.9, // ความเร็วปกติค่อนไปทางช้าเล็กน้อย (0.5 ถึง 2.0)
       fontSizeScale: 1.0, // อัตราขยายขนาดตัวอักษร (0.5 ถึง 2.0)
+      numberColor: '#f59e0b', // สีตัวเลขเป้าหมายเริ่มต้น (สีทองเหลือง)
       darkMode: true
     };
 
+    let selectedTempColor = config.numberColor; // เก็บค่าสีชั่วคราวตอนที่เปิดหน้าต่างตั้งค่าอยู่
     let drawnNumbers = []; // ตัวเลขที่สุ่มออกไปแล้ว
     let lastResults = [0]; // เก็บประวัติล่าสุดสำหรับปุ่มกดซ้ำ
     let isRolling = false; // สถานะกำลังประมวลผลการสุ่มอยู่หรือไม่
@@ -504,6 +544,38 @@
     inputSpeechRate.addEventListener('input', (e) => {
       labelSpeechRateVal.textContent = `${e.target.value}x`;
     });
+
+    // คอนโทรลเลือกสีจาก Preset ต่างๆ
+    colorPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        selectedTempColor = btn.getAttribute('data-color');
+        inputCustomColor.value = selectedTempColor;
+        labelCustomColor.textContent = selectedTempColor.toUpperCase();
+        highlightPreset(selectedTempColor);
+      });
+    });
+
+    // คอนโทรลการสไลด์สีแบบ Custom จาก Color Picker
+    inputCustomColor.addEventListener('input', (e) => {
+      selectedTempColor = e.target.value;
+      labelCustomColor.textContent = selectedTempColor.toUpperCase();
+      highlightPreset(selectedTempColor);
+    });
+
+    // ทำเครื่องหมายไฮไลต์ปุ่มเฉดสีด่วนที่เปิดใช้งานอยู่
+    function highlightPreset(color) {
+      colorPresetBtns.forEach(btn => {
+        const btnColor = btn.getAttribute('data-color').toLowerCase();
+        if (btnColor === color.toLowerCase()) {
+          btn.classList.add('border-white', 'scale-110');
+          btn.classList.remove('border-transparent');
+        } else {
+          btn.classList.remove('border-white', 'scale-110');
+          btn.classList.add('border-transparent');
+        }
+      });
+    }
 
     // แสดง Alert แบบ Custom แทน alert() ปกติ
     function showAlert(msg) {
@@ -530,7 +602,7 @@
       }
     }
 
-    // ฟังก์ชันสำหรับแปลงตัวเลขเป็นตัวหนังสือภาษาไทย (Thai Number-to-Text Translator)
+    // ฟังก์ชันสำหรับแปลงตัวเลขเป็นตัวหนังสือภาษาไทย
     function translateNumToThaiText(num) {
       if (num === 0) return "ศูนย์";
       
@@ -622,7 +694,7 @@
       }
     }
 
-    // ฟังก์ชันเล่นเสียง TTS ออนไลน์พร้อมฟังก์ชันปรับระดับความเร็ว (Speed/Playback Rate)
+    // ฟังก์ชันเล่นเสียง TTS ออนไลน์พร้อมฟังก์ชันปรับระดับความเร็ว
     function playOnlineSpeech(text, langCode) {
       stopAllSpeech();
       
@@ -633,8 +705,6 @@
       
       try {
         currentAudioNode = new Audio(url);
-        
-        // กำหนดความเร็วการเล่นเสียงในออดิโอออนไลน์
         currentAudioNode.playbackRate = config.speechRate;
         
         currentAudioNode.play()
@@ -661,7 +731,6 @@
       if (config.speechSource === 'online') {
         playOnlineSpeech(textToSpeak, 'th');
       } else {
-        // ใช้ Web Speech API ของเครื่อง
         if (!('speechSynthesis' in window)) {
           setSpeechStatus("เบราว์เซอร์ไม่รองรับ Web Speech API ของเครื่อง", true);
           return;
@@ -669,13 +738,10 @@
         
         stopAllSpeech();
         
-        // หน่วงเวลาเล็กน้อยเพื่อป้องกันเบราว์เซอร์ค้างเสียง
         setTimeout(() => {
           try {
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
             utterance.lang = 'th-TH';
-            
-            // ใช้ความเร็วเสียงพูดที่กำหนดไว้ใน Config
             utterance.rate = config.speechRate;
             utterance.pitch = 1.0;
 
@@ -714,8 +780,6 @@
           try {
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
             utterance.lang = 'en-US';
-            
-            // ใช้ความเร็วเสียงพูดที่กำหนดไว้ใน Config
             utterance.rate = config.speechRate;
             utterance.pitch = 1.0;
 
@@ -778,6 +842,12 @@
       labelFontSizeVal.textContent = `${Math.round(config.fontSizeScale * 100)}%`;
       inputSpeechRate.value = config.speechRate;
       labelSpeechRateVal.textContent = `${config.speechRate}x`;
+
+      // ดึงค่าการตั้งค่าสีหลักมาแสดงผล
+      selectedTempColor = config.numberColor;
+      inputCustomColor.value = selectedTempColor;
+      labelCustomColor.textContent = selectedTempColor.toUpperCase();
+      highlightPreset(selectedTempColor);
 
       // อัปเดตปุ่มเลือกแหล่งเสียงพูดใน Settings
       if (config.speechSource === 'online') {
@@ -846,7 +916,14 @@
       config.count = countVal;
       config.noRepeat = inputNoRepeat.checked;
       config.enableSpeech = inputSpeech.checked;
+      config.numberColor = selectedTempColor; // นำสีที่ผู้ใช้งานเลือกใน Panel ไปเก็บไว้เป็นสีหลักสุ่ม
+
+      // อัปเดต CSS Variable เพื่ออัปเดตสีเอฟเฟกต์ไฟกระพริบด้านหลัง
+      document.documentElement.style.setProperty('--winner-color', config.numberColor);
       
+      // เปลี่ยนสีคำอ่านภาษาเขียนใน UI ให้ตรงกับสีตัวเลขที่เลือก
+      thaiWrittenText.style.color = config.numberColor;
+
       // อัปเดตสเกลตัวอักษรและความเร็วของเสียงพูด
       config.fontSizeScale = parseFloat(inputFontSize.value);
       config.speechRate = parseFloat(inputSpeechRate.value);
@@ -915,13 +992,14 @@
         return;
       }
 
-      // วนซ้ำประวัติจากหลังสุดไปหน้าสุด
       const reversedDraws = [...drawnNumbers].reverse();
       reversedDraws.forEach((num, index) => {
         const item = document.createElement('div');
-        item.className = "px-3 py-1.5 bg-slate-800 text-amber-400 font-mono-num font-bold rounded-lg border border-slate-700 text-sm flex items-center space-x-1 hover:border-amber-500/50 transition-colors";
+        item.className = "px-3 py-1.5 bg-slate-800 text-slate-100 font-mono-num font-bold rounded-lg border border-slate-700 text-sm flex items-center justify-x-1 hover:border-amber-500/50 transition-colors";
         
-        // แสดงลำดับย้อนหลัง
+        // กำหนดสีของข้อความตัวเลขในประวัติตามสีที่เลือกไว้ในระบบ
+        item.style.color = config.numberColor;
+
         const order = drawnNumbers.length - index;
         item.innerHTML = `<span class="text-slate-500 text-[10px] mr-1">#${order}</span>${num}`;
         historyContainer.appendChild(item);
@@ -987,19 +1065,19 @@
       lucide.createIcons();
     }
 
-    // ================= แกนหลักของการสุ่ม (RNG Core Engine) =================
+    // ================= STREAMING_CHUNK: RNG Engine Core... =================
     
     // สุ่มตัวเลขเดี่ยวในช่วงที่กำหนด
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // ฟังก์ชันปรับขนาดฟอนต์ของตัวเลขสุ่มให้เต็มจอได้อย่างพอเหมาะโดยอัตโนมัติ (Responsive Auto-fit + ปรับขนาดสเกลตามผู้ใช้เลือก)
+    // ฟังก์ชันปรับขนาดฟอนต์ของตัวเลขสุ่มให้เต็มจอได้อย่างพอเหมาะโดยอัตโนมัติ
     function adjustFontSize() {
       const itemsCount = numberDisplayContainer.children.length;
       const elements = numberDisplayContainer.querySelectorAll('.lucky-number-card');
       
-      let baseVw = 16; // อิงขนาดเริ่มต้นกรณีทั่วไป
+      let baseVw = 16; 
 
       if (itemsCount === 1) {
         baseVw = 18;
@@ -1011,7 +1089,6 @@
         baseVw = 5;
       }
 
-      // คูณสเกลขนาดจากหน้าตั้งค่า (config.fontSizeScale) เข้าไปด้วย
       const finalFontSize = (baseVw * config.fontSizeScale) + "vw";
 
       elements.forEach(el => {
@@ -1025,7 +1102,6 @@
 
       const totalPoolSize = (config.max - config.min) + 1;
       
-      // เช็คว่าจำนวนตัวเลขในพูลที่เหลือเพียงพอกับจำนวนที่ต้องการสุ่มต่อครั้งหรือไม่ (เฉพาะกรณี No Repeat)
       if (config.noRepeat) {
         const remainingPool = totalPoolSize - drawnNumbers.length;
         if (remainingPool < config.count) {
@@ -1034,16 +1110,14 @@
         }
       }
 
-      // หยุดเสียงที่เคยค้างอยู่ทันทีเมื่อมีการสุ่มรอบใหม่
       stopAllSpeech();
 
-      // เริ่มดำเนินการสุ่ม (Start Rolling Effect)
+      // เริ่มดำเนินการสุ่ม
       isRolling = true;
       rollBtn.disabled = true;
       rollBtn.classList.add('opacity-50', 'cursor-not-allowed');
       statusMessage.textContent = "กำลังหมุนวงล้อสุ่มตัวเลข...";
 
-      // ปิดการคลิกปุ่มสปีชคอนโทรลชั่วคราวระหว่างวิ่งแรนดอม
       speakThBtn.classList.add('opacity-40', 'pointer-events-none');
       speakEnBtn.classList.add('opacity-40', 'pointer-events-none');
 
@@ -1053,32 +1127,26 @@
         const candidate = getRandomInt(config.min, config.max);
         
         if (config.noRepeat) {
-          // ห้ามซ้ำประวัติเดิม และ ห้ามซ้ำกับพวกที่พึ่งกำลังสุ่มได้ในรอบเดียวกันนี้ด้วย
           if (!drawnNumbers.includes(candidate) && !resultsThisRound.includes(candidate)) {
             resultsThisRound.push(candidate);
           }
         } else {
-          // ซ้ำได้ แต่อย่างน้อยในรอบสุ่มเดียวกันไม่ควรซ้ำกันเพื่อให้ได้อรรถรสที่ดีกว่า
           if (!resultsThisRound.includes(candidate)) {
             resultsThisRound.push(candidate);
           }
         }
       }
 
-      // บันทึกตัวแปรโกลบอลสำหรับรอบนี้
       lastResults = resultsThisRound;
 
-      // เคลียร์พื้นที่แสดงผลและวาดการ์ดสำหรับสุ่มเตรียมไว้
       numberDisplayContainer.innerHTML = '';
       const cards = [];
 
       for (let i = 0; i < config.count; i++) {
         const card = document.createElement('div');
-        // ตกแต่งการ์ดแสดงผลตัวเลข
         card.className = "lucky-number-card font-mono-num font-extrabold leading-none transition-all duration-150 transform scale-95 border-amber-500/10";
-        card.style.color = "rgb(156, 163, 175)"; // ให้สี Slate-400 ก่อนระหว่างวิ่ง
+        card.style.color = "rgb(156, 163, 175)"; // ให้สีเทา Slate ระหว่างหมุนสุ่ม
         
-        // ใส่เอฟเฟกต์แอนิเมชันตอนตัวเลขเริ่มโชว์
         card.textContent = getRandomInt(config.min, config.max);
         numberDisplayContainer.appendChild(card);
         cards.push(card);
@@ -1088,46 +1156,40 @@
 
       // สร้างแอนิเมชันตอนตัวเลขวิ่งสลับเร็วๆ (Shuffle Effect)
       let shuffleTicks = 0;
-      const totalTicks = 20; // จำนวนเฟรมสปินวิ่งก่อนจะหยุดที่คำตอบจริง
-      const intervalDelay = 80; // ระยะเวลาหน่วงแต่ละเฟรม (ms)
+      const totalTicks = 20; 
+      const intervalDelay = 80; 
 
       const shuffleInterval = setInterval(() => {
         shuffleTicks++;
         SoundEffects.playTick();
 
-        // เปลี่ยนตัวเลขแรนดอมหลอกๆ ไปเรื่อยๆ
         cards.forEach((card, index) => {
           card.textContent = getRandomInt(config.min, config.max);
         });
 
-        // จังหวะที่จะทยอยหยุดทีละตัวเพื่อความระทึกใจ (Staggered Stop)
         if (shuffleTicks >= totalTicks) {
           clearInterval(shuffleInterval);
           
-          // สรุปผลลัพธ์ของแต่ละใบการ์ด
           cards.forEach((card, index) => {
             const finalNum = resultsThisRound[index];
             card.textContent = finalNum;
             
-            // เปลี่ยนสีตัวเลขและขยายขนาดแสดงถึงชัยชนะ
-            card.style.color = "rgb(245, 158, 11)"; // Amber-500 สีทองโดดเด่น
+            // นำคลาส CSS ปลดปล่อยเอฟเฟกต์ไฟเรืองแสงตามเฉดสีที่ตั้งค่าไว้มาครอบใช้งาน
             card.classList.add('winner-pulse', 'scale-100');
             card.classList.remove('scale-95');
 
-            // บันทึกตัวเลขนี้ลงประวัติระบบหลัก
             drawnNumbers.push(finalNum);
           });
 
-          // อัปเดตสเตตัสเสร็จสิ้น
           SoundEffects.playSuccess();
           isRolling = false;
           rollBtn.disabled = false;
           rollBtn.classList.remove('opacity-50', 'cursor-not-allowed');
           
           if (config.count === 1) {
-            statusMessage.innerHTML = `ได้ตัวเลขผู้โชคดีเรียบร้อยแล้ว: <strong class="text-amber-500 font-bold">${resultsThisRound[0]}</strong>`;
+            statusMessage.innerHTML = `ได้ตัวเลขผู้โชคดีเรียบร้อยแล้ว: <strong style="color: ${config.numberColor};" class="font-bold">${resultsThisRound[0]}</strong>`;
           } else {
-            statusMessage.innerHTML = `สุ่มครบแล้ว <strong class="text-amber-500 font-bold">${config.count}</strong> จำนวน`;
+            statusMessage.innerHTML = `สุ่มครบแล้ว <strong style="color: ${config.numberColor};" class="font-bold">${config.count}</strong> จำนวน`;
           }
 
           // อัปเดตกล่องตัวหนังสือคำอ่านภาษาเขียนบนหน้าจอ (TH / EN)
@@ -1136,11 +1198,9 @@
           // ปรับปรุงผลการสถิติ UI
           updateStatsUI();
 
-          // ปลดล็อกให้สามารถกดปุ่มสปีชคอนโทรลแมนนวลได้อีกครั้ง
           speakThBtn.classList.remove('opacity-40', 'pointer-events-none');
           speakEnBtn.classList.remove('opacity-40', 'pointer-events-none');
 
-          // รันเสียงพูดภาษาไทยอัตโนมัติโดยตรงจากข้อความตัวหนังสือที่แปลงเสร็จแล้ว
           if (config.enableSpeech) {
             speakThaiText(resultsThisRound);
           }
@@ -1148,11 +1208,9 @@
       }, intervalDelay);
     });
 
-    // ================= ผูกเหตุการณ์การคลิกให้กับปุ่ม Manual TTS =================
-
     // ผูก Event Listener ปุ่มอ่านออกเสียงภาษาไทยแบบ Manual
     speakThBtn.addEventListener('click', () => {
-      if (isRolling) return; // ไม่ทำงานขณะกำลังวิ่งสุ่มอยู่
+      if (isRolling) return; 
       SoundEffects.playClick();
       if (lastResults && lastResults.length > 0) {
         speakThaiText(lastResults);
@@ -1161,7 +1219,7 @@
 
     // ผูก Event Listener ปุ่มอ่านออกเสียงภาษาอังกฤษแบบ Manual
     speakEnBtn.addEventListener('click', () => {
-      if (isRolling) return; // ไม่ทำงานขณะกำลังวิ่งสุ่มอยู่
+      if (isRolling) return; 
       SoundEffects.playClick();
       if (lastResults && lastResults.length > 0) {
         speakEnglishText(lastResults);
@@ -1171,12 +1229,16 @@
     // เริ่มต้นระบบครั้งแรก
     window.onload = function () {
       config.darkMode = true;
+      
+      // ตั้งค่าสีตัวหนังสือและแสงเรืองแสงเริ่มต้นให้เป็นไปตาม Config
+      document.documentElement.style.setProperty('--winner-color', config.numberColor);
+      thaiWrittenText.style.color = config.numberColor;
+
       renderPlaceholder();
       updateStatsUI();
       updateSpeechIconUI();
       updateWrittenTextUI(lastResults);
 
-      // อุ่นเครื่องการโหลดเสียงภาษาไทยของเบราว์เซอร์
       if ('speechSynthesis' in window) {
         window.speechSynthesis.getVoices();
         if (window.speechSynthesis.onvoiceschanged !== undefined) {
