@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสุ่มตัวเลขขนาดใหญ่เต็มจอ</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap');
+    
+    body {
+      font-family: 'Kanit', sans-serif;
+    }
+    
+    .font-mono-num {
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* เอฟเฟกต์ไฟกระพริบตอนสุ่มเสร็จ */
+    @keyframes pulse-gold {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.4)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 50px rgba(245, 158, 11, 0.8)); }
+    }
+    .winner-pulse {
+      animation: pulse-gold 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-full flex flex-col justify-between overflow-hidden transition-colors duration-300">
+
+  <!-- แถบด้านบน (Header / Controls Shortcut) -->
+  <header class="p-4 bg-slate-950/50 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-10">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-amber-500 rounded-lg text-slate-900">
+        <i data-lucide="dices" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">LUCKY NUMBER</h1>
+        <p class="text-xs text-slate-400">ระบบสุ่มตัวเลขทรงพลัง</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <!-- ปุ่มเปิดปิดเสียงเอฟเฟกต์ -->
+      <button id="toggle-sound-btn" class="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="เปิด/ปิดเสียงเอฟเฟกต์">
+        <i data-lucide="volume-2" id="sound-icon" class="w-5 h-5"></i>
+      </button>
+      <!-- ปุ่มเปิดปิดการอ่านออกเสียง (TTS) อัตโนมัติ -->
+      <button id="toggle-speech-btn" class="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="เปิด/ปิดการอ่านออกเสียงอัตโนมัติเมื่อสุ่มเสร็จ">
+        <i data-lucide="audio-lines" id="speech-icon" class="w-5 h-5"></i>
+      </button>
+      <!-- ปุ่มเปลี่ยนธีม -->
+      <button id="toggle-theme-btn" class="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="เปลี่ยนธีม">
+        <i data-lucide="sun" id="theme-icon" class="w-5 h-5"></i>
+      </button>
+      <!-- ปุ่มเปิดตั้งค่า -->
+      <button id="open-settings-btn" class="p-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold flex items-center space-x-1.5 transition-colors">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+        <span class="hidden sm:inline">ตั้งค่า</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- พื้นที่แสดงผลตัวเลขหลัก (Main Display Zone) -->
+  <main class="flex-1 flex flex-col justify-center items-center p-6 relative select-none">
+    <!-- พื้นหลังกราฟิกเบาๆ -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_70%)] pointer-events-none"></div>
+
+    <!-- กล่องหลักสำหรับตัวเลขสุ่ม -->
+    <div class="w-full max-w-7xl flex flex-col items-center justify-center flex-1">
+      <!-- Container สำหรับตัวเลขที่จะถูกแสดงแบบ Dynamic -->
+      <div id="number-display-container" class="w-full flex flex-wrap items-center justify-center gap-6 px-4 py-8">
+        <!-- ตัวอย่างเริ่มต้น -->
+        <div class="lucky-number-card font-mono-num font-extrabold text-[15vw] sm:text-[18vw] leading-none text-slate-600 transition-all duration-300 tracking-wider">
+          00
+        </div>
+      </div>
+      
+      <!-- ข้อความแจ้งสถานะย่อย -->
+      <p id="status-message" class="text-slate-400 text-sm sm:text-base md:text-lg mt-2 h-6 text-center max-w-md">
+        พร้อมทำการสุ่มแล้ว! กรุณากดปุ่มสุ่มด้านล่าง
+      </p>
+
+      <!-- กล่องแสดงคำอ่านตัวอักษรภาษาไทยและอังกฤษที่ได้จากการแปลงค่า -->
+      <div id="written-text-container" class="mt-6 p-4 bg-slate-950/40 border border-slate-800/80 rounded-2xl max-w-xl w-full text-center space-y-2 backdrop-blur-sm shadow-inner">
+        <div class="text-xs text-slate-500 font-semibold tracking-wider uppercase">คำอ่านตัวหนังสือภาษาไทย</div>
+        <div id="thai-written-text" class="text-lg sm:text-xl font-bold text-amber-400">ศูนย์</div>
+        <div id="english-written-text" class="text-xs sm:text-sm text-slate-400 font-medium italic">Zero</div>
+      </div>
+
+      <!-- ส่วนควบคุมการอ่านออกเสียงด้วยตนเอง (Manual Speech Controls) -->
+      <div id="manual-speech-controls" class="flex flex-col items-center justify-center gap-3 mt-6 w-full max-w-md">
+        <!-- แถบแจ้งเตือนสถานะการประมวลผลเสียงพูดชั่วคราว -->
+        <span id="speech-status-bar" class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide uppercase h-5">ฟังการอ่านออกเสียงซ้ำ</span>
+        <div class="flex items-center justify-center gap-3 w-full">
+          <!-- ปุ่มอ่านภาษาไทย -->
+          <button id="speak-th-btn" class="flex-1 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 font-semibold text-sm flex items-center justify-center space-x-2 transition-all border border-amber-500/20 hover:scale-105 active:scale-95 shadow-md shadow-amber-500/5">
+            <i data-lucide="volume-2" class="w-4 h-4"></i>
+            <span>อ่านออกเสียง (TH)</span>
+          </button>
+          <!-- ปุ่มอ่านภาษาอังกฤษ -->
+          <button id="speak-en-btn" class="flex-1 px-5 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 font-semibold text-sm flex items-center justify-center space-x-2 transition-all border border-blue-500/20 hover:scale-105 active:scale-95 shadow-md shadow-blue-500/5">
+            <i data-lucide="volume-2" class="w-4 h-4"></i>
+            <span>Read Aloud (EN)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- แถบด้านล่างสำหรับควบคุมด่วน (Footer Controls) -->
+  <footer class="p-6 bg-slate-950/60 backdrop-blur-md border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 z-10">
+    <!-- รายละเอียดค่าปัจจุบัน -->
+    <div class="flex flex-wrap gap-4 text-xs sm:text-sm text-slate-400 justify-center md:justify-start">
+      <div class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        <span>ช่วง: <strong id="info-range" class="text-slate-200">1 - 100</strong></span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <span>จำนวนที่สุ่มต่อครั้ง: <strong id="info-count" class="text-slate-200">1 ตัว</strong></span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>ห้ามซ้ำ: <strong id="info-no-repeat" class="text-slate-200">เปิดใช้งาน</strong></span>
+      </div>
+    </div>
+
+    <!-- ปุ่มสุ่มยักษ์และปุ่มรีเซ็ต -->
+    <div class="flex items-center space-x-3 w-full md:w-auto justify-center">
+      <!-- ปุ่มเคลียร์ / รีเซ็ตประวัติ -->
+      <button id="quick-reset-btn" class="px-5 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-all duration-200 flex items-center space-x-2 border border-slate-700" title="เริ่มระบบใหม่ทั้งหมด">
+        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        <span class="hidden sm:inline">เริ่มใหม่</span>
+      </button>
+
+      <!-- ปุ่มสุ่มหลัก -->
+      <button id="roll-btn" class="flex-1 md:flex-none px-12 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xl font-extrabold rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-all duration-150 flex items-center justify-center space-x-3 min-w-[180px]">
+        <i data-lucide="play" class="w-6 h-6 fill-current"></i>
+        <span>สุ่มตัวเลข!</span>
+      </button>
+    </div>
+
+    <!-- แสดงสถิติจำนวนที่สุ่มไปแล้ว -->
+    <div class="text-xs sm:text-sm text-slate-400 text-center md:text-right">
+      สุ่มไปแล้ว <span id="info-drawn-count" class="text-amber-400 font-bold text-base">0</span> ตัว 
+      (คงเหลือ <span id="info-remain-count" class="text-slate-200 font-semibold">100</span> ตัว)
+    </div>
+  </footer>
+
+  <!-- ================= Drawer / Sidebar ตั้งค่าและการสุ่ม (Settings Modal) ================= -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-end transition-opacity duration-300 opacity-0 pointer-events-none">
+    <!-- หน้าต่างตั้งค่าด้านขวา -->
+    <div id="settings-panel" class="w-full max-w-md bg-slate-900 border-l border-slate-800 h-full p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out shadow-2xl">
+      
+      <!-- หัวข้อการตั้งค่า -->
+      <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-amber-500"></i>
+          <h2 class="text-xl font-bold">กำหนดค่าและประวัติ</h2>
+        </div>
+        <button id="close-settings-btn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- ส่วนเนื้อหาตั้งค่า -->
+      <div class="flex-1 overflow-y-auto my-6 space-y-6 pr-1">
+        <!-- 1. ช่วงตัวเลขที่จะสุ่ม -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="binary" class="w-4 h-4"></i> ช่วงตัวเลขที่ต้องการสุ่ม
+          </h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">ตัวเลขเริ่มต้น (ต่ำสุด)</label>
+              <input type="number" id="input-min" value="1" min="0" max="999999" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-center font-mono-num">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">ตัวเลขสิ้นสุด (สูงสุด)</label>
+              <input type="number" id="input-max" value="100" min="1" max="999999" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-center font-mono-num">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. จำนวนตัวเลขที่จะสุ่มต่อครั้ง -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-4 h-4"></i> จำนวนที่สุ่มต่อครั้ง
+          </h3>
+          <div>
+            <input type="range" id="input-count-range" min="1" max="10" value="1" class="w-full accent-amber-500">
+            <div class="flex justify-between items-center text-xs text-slate-400 mt-1">
+              <span>สุ่มทีละ 1 ตัว</span>
+              <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold" id="label-count-val">1 ตัว</span>
+              <span>สุ่มพร้อมกัน 10 ตัว</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. ปรับขนาดตัวอักษรของตัวเลขหลัก -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="type" class="w-4 h-4"></i> ปรับขนาดตัวอักษรของตัวเลข
+          </h3>
+          <div>
+            <input type="range" id="input-font-size" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-amber-500">
+            <div class="flex justify-between items-center text-xs text-slate-400 mt-1">
+              <span>ขนาดเล็ก (50%)</span>
+              <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold" id="label-font-size-val">100%</span>
+              <span>ขนาดใหญ่สุด (200%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ตั้งค่าระบบเสียงและแหล่งกำเนิดเสียง -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="volume-2" class="w-4 h-4"></i> แหล่งเสียงอ่านออกเสียง (TTS)
+          </h3>
+          <div class="grid grid-cols-2 gap-2 bg-slate-950/40 p-1.5 rounded-xl border border-slate-800">
+            <button id="source-online-btn" class="py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950">
+              เสียงออนไลน์ (แนะนำ)
+            </button>
+            <button id="source-system-btn" class="py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+              เสียงจากระบบเครื่อง
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed px-1">
+            * <strong>เสียงออนไลน์:</strong> ชัดเจน 100% ไม่ต้องติดตั้งโปรแกรมเพิ่ม (ต้องการเน็ต)<br>
+            * <strong>เสียงระบบเครื่อง:</strong> ดึงเสียงสังเคราะห์ใน Windows/iOS/Android ของคุณ
+          </p>
+        </div>
+
+        <!-- 5. ปรับความเร็วในการอ่านออกเสียงเพื่อเด็กและผู้เริ่มต้นฝึกฟัง -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="gauge" class="w-4 h-4"></i> ความเร็วในการอ่านออกเสียง
+          </h3>
+          <div>
+            <input type="range" id="input-speech-rate" min="0.5" max="2.0" step="0.1" value="0.9" class="w-full accent-amber-500">
+            <div class="flex justify-between items-center text-xs text-slate-400 mt-1">
+              <span>ช้ามาก (0.5x)</span>
+              <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold" id="label-speech-rate-val">0.9x</span>
+              <span>เร็ว (2.0x)</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1.5">
+              * แนะนำความเร็ว <strong>0.7x - 0.9x</strong> สำหรับเด็กหัดฟังเพื่อออกเสียงสะกดตามได้ทัน
+            </p>
+          </div>
+        </div>
+
+        <!-- 6. ตั้งค่าตัวเลือกอื่นๆ -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i> ตัวเลือกการทำงาน
+          </h3>
+          <div class="space-y-2">
+            <!-- สุ่มซ้ำ -->
+            <label class="flex items-center space-x-3 cursor-pointer bg-slate-800/50 hover:bg-slate-800 p-3 rounded-lg border border-slate-800 transition-colors">
+              <input type="checkbox" id="input-no-repeat" checked class="w-4 h-4 text-amber-500 accent-amber-500 rounded">
+              <div>
+                <span class="text-sm font-medium text-slate-200 block">ไม่สุ่มตัวเลขที่เคยออกแล้วซ้ำ</span>
+                <span class="text-xs text-slate-400">ระบบจะไม่สุ่มได้เลขเดิมจนกว่าจะกดเริ่มใหม่</span>
+              </div>
+            </label>
+            <!-- อ่านออกเสียง -->
+            <label class="flex items-center space-x-3 cursor-pointer bg-slate-800/50 hover:bg-slate-800 p-3 rounded-lg border border-slate-800 transition-colors">
+              <input type="checkbox" id="input-speech" checked class="w-4 h-4 text-amber-500 accent-amber-500 rounded">
+              <div>
+                <span class="text-sm font-medium text-slate-200 block">อ่านออกเสียงอัตโนมัติเมื่อเสร็จสิ้น</span>
+                <span class="text-xs text-slate-400">ระบบจะทำการอ่านตัวเลขให้ฟังทันทีหลังได้ผลลัพธ์</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 7. ประวัติการสุ่มล่าสุด -->
+        <div class="space-y-3 pt-4 border-t border-slate-800">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="history" class="w-4 h-4"></i> ประวัติการสุ่ม (<span id="history-count">0</span>)
+            </h3>
+            <button id="clear-history-btn" class="text-xs text-red-400 hover:text-red-300 hover:underline flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> ล้างประวัติ
+            </button>
+          </div>
+          <!-- กล่องรายการประวัติ -->
+          <div id="history-container" class="bg-slate-950/60 rounded-xl p-3 max-h-[100px] overflow-y-auto border border-slate-800 flex flex-wrap gap-2 content-start">
+            <p class="text-xs text-slate-500 text-center w-full py-4">ยังไม่มีประวัติการสุ่ม</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ปุ่มอัปเดตการตั้งค่า -->
+      <div class="space-y-2 pt-4 border-t border-slate-800">
+        <button id="save-settings-btn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg transition-colors flex items-center justify-center space-x-2">
+          <i data-lucide="check" class="w-5 h-5"></i>
+          <span>บันทึกและใช้งาน</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- แจ้งเตือนข้อความเตือนเมื่อมีข้อผิดพลาด (Custom Modal) -->
+  <div id="custom-alert" class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[100] opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-200 mb-2">แจ้งเตือน</h3>
+      <p id="alert-message" class="text-sm text-slate-400 mb-5">ข้อความเตือน</p>
+      <button id="alert-close" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg transition-colors">
+        รับทราบ
+      </button>
+    </div>
+  </div>
+
+  <!-- ออดิโอจำลองสำหรับทำเสียงเอฟเฟกต์ (ใช้วิธีสร้างผ่าน Web Audio API เพื่อความเสถียร ไม่ต้องโหลดไฟล์ภายนอก) -->
+  <script>
+    const SoundEffects = {
+      ctx: null,
+      enabled: true,
+
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+
+      // เสียงสุ่มตัวเลข (บี๊บสั้นๆ ถี่ๆ ตอนวิ่ง)
+      playTick() {
+        if (!this.enabled) return;
+        this.init();
+        
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400 + Math.random() * 200, this.ctx.currentTime);
+          
+          gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.08);
+        } catch (e) {
+          console.error("Audio error", e);
+        }
+      },
+
+      // เสียงเมื่อสุ่มหยุด / ได้ผลลัพธ์ (เสียงเฉลิมฉลอง / ชนะรางวัล)
+      playSuccess() {
+        if (!this.enabled) return;
+        this.init();
+        
+        try {
+          const now = this.ctx.currentTime;
+          
+          // โน้ตเพลงสั้นๆ 4 ตัวเร็วๆ
+          const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+          notes.forEach((freq, index) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + index * 0.1);
+            
+            gain.gain.setValueAtTime(0.15, now + index * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.25);
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            osc.start(now + index * 0.1);
+            osc.stop(now + index * 0.1 + 0.25);
+          });
+        } catch (e) {
+          console.error("Audio error", e);
+        }
+      },
+
+      // เสียงปุ่มกดทั่วไป
+      playClick() {
+        if (!this.enabled) return;
+        this.init();
+        
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(280, this.ctx.currentTime);
+          
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.1);
+        } catch (e) {}
+      }
+    };
+  </script>
+
+  <!-- สคริปต์หลักควบคุมการทำงาน -->
+  <script>
+    // ไอคอน Lucide
+    lucide.createIcons();
+
+    // ================= ประกาศตัวแปรรับค่า Elements (ย้ายขึ้นด้านบนสุดเพื่อป้องกันปัญหา TDZ) =================
+    const numberDisplayContainer = document.getElementById('number-display-container');
+    const statusMessage = document.getElementById('status-message');
+    const rollBtn = document.getElementById('roll-btn');
+    const quickResetBtn = document.getElementById('quick-reset-btn');
+    const toggleSoundBtn = document.getElementById('toggle-sound-btn');
+    const soundIcon = document.getElementById('sound-icon');
+    const toggleSpeechBtn = document.getElementById('toggle-speech-btn');
+    const speechIcon = document.getElementById('speech-icon');
+    const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const openSettingsBtn = document.getElementById('open-settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const saveSettingsBtn = document.getElementById('save-settings-btn');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+    // Custom Alert Elements
+    const customAlert = document.getElementById('custom-alert');
+    const alertMessage = document.getElementById('alert-message');
+    const alertClose = document.getElementById('alert-close');
+
+    // Written Text Box Elements
+    const thaiWrittenText = document.getElementById('thai-written-text');
+    const englishWrittenText = document.getElementById('english-written-text');
+
+    // Speech Manual Controls
+    const manualSpeechControls = document.getElementById('manual-speech-controls');
+    const speakThBtn = document.getElementById('speak-th-btn');
+    const speakEnBtn = document.getElementById('speak-en-btn');
+    const speechStatusBar = document.getElementById('speech-status-bar');
+
+    // Settings elements
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsPanel = document.getElementById('settings-panel');
+    const inputMin = document.getElementById('input-min');
+    const inputMax = document.getElementById('input-max');
+    const inputCountRange = document.getElementById('input-count-range');
+    const labelCountVal = document.getElementById('label-count-val');
+    const inputNoRepeat = document.getElementById('input-no-repeat');
+    const inputSpeech = document.getElementById('input-speech');
+    const sourceOnlineBtn = document.getElementById('source-online-btn');
+    const sourceSystemBtn = document.getElementById('source-system-btn');
+    const historyContainer = document.getElementById('history-container');
+    const historyCountLabel = document.getElementById('history-count');
+
+    // Settings Elements สำหรับปรับแต่งขนาดตัวอักษรและความเร็ว
+    const inputFontSize = document.getElementById('input-font-size');
+    const labelFontSizeVal = document.getElementById('label-font-size-val');
+    const inputSpeechRate = document.getElementById('input-speech-rate');
+    const labelSpeechRateVal = document.getElementById('label-speech-rate-val');
+
+    // Stats Info Elements
+    const infoRange = document.getElementById('info-range');
+    const infoCount = document.getElementById('info-count');
+    const infoNoRepeat = document.getElementById('info-no-repeat');
+    const infoDrawnCount = document.getElementById('info-drawn-count');
+    const infoRemainCount = document.getElementById('info-remain-count');
+
+    // ================= จบการประกาศตัวแปร Elements =================
+
+    // ตัวแปรควบคุมสถานะของระบบ (State)
+    let config = {
+      min: 1,
+      max: 100,
+      count: 1,
+      noRepeat: true,
+      enableSpeech: true, // เปิด/ปิดเสียงพูดอัตโนมัติ
+      speechSource: 'online', // แหล่งเสียงหลัก: 'online' (เสถียรที่สุด) หรือ 'system' (ดึงเครื่อง)
+      speechRate: 0.9, // ความเร็วปกติค่อนไปทางช้าเล็กน้อย (0.5 ถึง 2.0)
+      fontSizeScale: 1.0, // อัตราขยายขนาดตัวอักษร (0.5 ถึง 2.0)
+      darkMode: true
+    };
+
+    let drawnNumbers = []; // ตัวเลขที่สุ่มออกไปแล้ว
+    let lastResults = [0]; // เก็บประวัติล่าสุดสำหรับปุ่มกดซ้ำ
+    let isRolling = false; // สถานะกำลังประมวลผลการสุ่มอยู่หรือไม่
+    let currentAudioNode = null; // สำหรับเล่นเสียงแบบออนไลน์
+
+    // อัปเดตตัวเลขเปอร์เซ็นต์ใน UI แถบตั้งค่าทันทีที่มีการขยับแถบเลื่อน
+    inputFontSize.addEventListener('input', (e) => {
+      labelFontSizeVal.textContent = `${Math.round(e.target.value * 100)}%`;
+    });
+
+    inputSpeechRate.addEventListener('input', (e) => {
+      labelSpeechRateVal.textContent = `${e.target.value}x`;
+    });
+
+    // แสดง Alert แบบ Custom แทน alert() ปกติ
+    function showAlert(msg) {
+      alertMessage.textContent = msg;
+      customAlert.classList.remove('pointer-events-none', 'opacity-0');
+      customAlert.classList.add('opacity-100');
+    }
+
+    alertClose.addEventListener('click', () => {
+      customAlert.classList.remove('opacity-100');
+      customAlert.classList.add('pointer-events-none', 'opacity-0');
+      SoundEffects.playClick();
+    });
+
+    // อัปเดตสถานะการออกเสียงให้ผู้ใช้เห็น
+    function setSpeechStatus(text, isError = false) {
+      speechStatusBar.textContent = text ? text : "ฟังการอ่านออกเสียงซ้ำ";
+      if (isError) {
+        speechStatusBar.classList.add('text-red-400');
+        speechStatusBar.classList.remove('text-slate-500', 'dark:text-slate-400');
+      } else {
+        speechStatusBar.classList.remove('text-red-400');
+        speechStatusBar.classList.add('text-slate-500', 'dark:text-slate-400');
+      }
+    }
+
+    // ฟังก์ชันสำหรับแปลงตัวเลขเป็นตัวหนังสือภาษาไทย (Thai Number-to-Text Translator)
+    function translateNumToThaiText(num) {
+      if (num === 0) return "ศูนย์";
+      
+      const thaiNums = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+      const units = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+      
+      let str = num.toString();
+      let len = str.length;
+      let out = "";
+
+      for (let i = 0; i < len; i++) {
+        let digit = parseInt(str.charAt(i));
+        let pos = len - i - 1; // ตำแหน่งหลักนับจากขวาสุด (เริ่มที่ 0)
+
+        if (digit !== 0) {
+          // กรณีพิเศษสำหรับ "หลักสิบ"
+          if (pos === 1) {
+            if (digit === 1) {
+              out += "สิบ";
+            } else if (digit === 2) {
+              out += "ยี่สิบ";
+            } else {
+              out += thaiNums[digit] + "สิบ";
+            }
+          } 
+          // กรณีพิเศษสำหรับ "หลักหน่วย" ที่มีหลักอื่นอยู่ก่อนหน้า
+          else if (pos === 0 && digit === 1 && len > 1) {
+            out += "เอ็ด";
+          } 
+          // หลักทั่วไป
+          else {
+            out += thaiNums[digit] + units[pos];
+          }
+        }
+      }
+      return out;
+    }
+
+    // ฟังก์ชันสำหรับแปลงตัวเลขเป็นตัวหนังสือภาษาอังกฤษ (English Number-to-Text)
+    function translateNumToEnglishText(num) {
+      if (num === 0) return "Zero";
+      
+      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", 
+                    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+      
+      if (num < 20) return ones[num];
+      
+      if (num < 100) {
+        return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? "-" + ones[num % 10] : "");
+      }
+      
+      if (num < 1000) {
+        return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 !== 0 ? " and " + translateNumToEnglishText(num % 100) : "");
+      }
+      
+      if (num < 1000000) {
+        return translateNumToEnglishText(Math.floor(num / 1000)) + " Thousand" + (num % 1000 !== 0 ? " " + translateNumToEnglishText(num % 1000) : "");
+      }
+      
+      return num.toString();
+    }
+
+    // อัปเดตกล่องตัวหนังสือภาษาเขียนบนหน้าจอ (TH / EN)
+    function updateWrittenTextUI(numbers) {
+      if (numbers.length === 0) {
+        thaiWrittenText.textContent = "-";
+        englishWrittenText.textContent = "-";
+        return;
+      }
+
+      const thaiTexts = numbers.map(num => translateNumToThaiText(num));
+      const englishTexts = numbers.map(num => translateNumToEnglishText(num));
+
+      thaiWrittenText.textContent = thaiTexts.join(' , ');
+      englishWrittenText.textContent = englishTexts.join(' , ');
+    }
+
+    // หยุดเสียงพูดทุกอย่างในระบบชั่วคราว
+    function stopAllSpeech() {
+      // 1. หยุดเสียงระบบเครื่อง
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      // 2. หยุดเสียงออนไลน์
+      if (currentAudioNode) {
+        currentAudioNode.pause();
+        currentAudioNode = null;
+      }
+    }
+
+    // ฟังก์ชันเล่นเสียง TTS ออนไลน์พร้อมฟังก์ชันปรับระดับความเร็ว (Speed/Playback Rate)
+    function playOnlineSpeech(text, langCode) {
+      stopAllSpeech();
+      
+      setSpeechStatus(`กำลังเล่นเสียงออนไลน์ (${langCode.toUpperCase()})...`);
+      
+      // ดึง API เสียงภาษาไทย/อังกฤษของ Google Translate
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(text)}`;
+      
+      try {
+        currentAudioNode = new Audio(url);
+        
+        // กำหนดความเร็วการเล่นเสียงในออดิโอออนไลน์
+        currentAudioNode.playbackRate = config.speechRate;
+        
+        currentAudioNode.play()
+          .then(() => {
+            currentAudioNode.onended = () => {
+              setSpeechStatus("");
+              currentAudioNode = null;
+            };
+          })
+          .catch(err => {
+            console.error("Audio playback blocked", err);
+            setSpeechStatus("การเล่นเสียงถูกบล็อกโดยเบราว์เซอร์ กรุณาสัมผัสหน้าจอ 1 ครั้งแล้วกดเล่นใหม่", true);
+          });
+      } catch (error) {
+        setSpeechStatus("ไม่สามารถเข้าถึงเซิร์ฟเวอร์เสียงออนไลน์ได้", true);
+      }
+    }
+
+    // ฟังก์ชันอ่านออกเสียงภาษาไทย
+    function speakThaiText(numbers) {
+      const thaiWordsList = numbers.map(num => translateNumToThaiText(num));
+      const textToSpeak = thaiWordsList.join(' , ');
+
+      if (config.speechSource === 'online') {
+        playOnlineSpeech(textToSpeak, 'th');
+      } else {
+        // ใช้ Web Speech API ของเครื่อง
+        if (!('speechSynthesis' in window)) {
+          setSpeechStatus("เบราว์เซอร์ไม่รองรับ Web Speech API ของเครื่อง", true);
+          return;
+        }
+        
+        stopAllSpeech();
+        
+        // หน่วงเวลาเล็กน้อยเพื่อป้องกันเบราว์เซอร์ค้างเสียง
+        setTimeout(() => {
+          try {
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'th-TH';
+            
+            // ใช้ความเร็วเสียงพูดที่กำหนดไว้ใน Config
+            utterance.rate = config.speechRate;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            let thaiVoice = voices.find(voice => voice.lang === 'th-TH') || voices.find(voice => voice.lang.includes('th') || voice.lang.includes('TH'));
+            if (thaiVoice) utterance.voice = thaiVoice;
+
+            utterance.onstart = () => setSpeechStatus(`กำลังอ่านภาษาไทย ความเร็ว ${config.speechRate}x...`);
+            utterance.onend = () => setSpeechStatus("");
+            utterance.onerror = () => setSpeechStatus("ไม่พบชุดเสียงภาษาไทยในคอมพิวเตอร์ของคุณ กรุณาเลือก 'เสียงออนไลน์'", true);
+
+            window.speechSynthesis.speak(utterance);
+          } catch (e) {
+            setSpeechStatus("การออกเสียงผ่านระบบล้มเหลว", true);
+          }
+        }, 100);
+      }
+    }
+
+    // ฟังก์ชันอ่านออกเสียงภาษาอังกฤษ
+    function speakEnglishText(numbers) {
+      const englishWordsList = numbers.map(num => translateNumToEnglishText(num));
+      const textToSpeak = englishWordsList.join(' , ');
+
+      if (config.speechSource === 'online') {
+        playOnlineSpeech(textToSpeak, 'en');
+      } else {
+        if (!('speechSynthesis' in window)) {
+          setSpeechStatus("เบราว์เซอร์ไม่รองรับ Web Speech API ของเครื่อง", true);
+          return;
+        }
+        
+        stopAllSpeech();
+
+        setTimeout(() => {
+          try {
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'en-US';
+            
+            // ใช้ความเร็วเสียงพูดที่กำหนดไว้ใน Config
+            utterance.rate = config.speechRate;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            let enVoice = voices.find(voice => voice.lang === 'en-US') || voices.find(voice => voice.lang.includes('en') || voice.lang.includes('EN'));
+            if (enVoice) utterance.voice = enVoice;
+
+            utterance.onstart = () => setSpeechStatus(`Speaking English Rate ${config.speechRate}x...`);
+            utterance.onend = () => setSpeechStatus("");
+            utterance.onerror = () => setSpeechStatus("Error playing English system voice", true);
+
+            window.speechSynthesis.speak(utterance);
+          } catch (e) {
+            setSpeechStatus("Failed to play English system voice", true);
+          }
+        }, 100);
+      }
+    }
+
+    // จัดการเปลี่ยนแหล่งเสียงระหว่าง Online และ System ในหน้าต่างตั้งค่า
+    sourceOnlineBtn.addEventListener('click', () => {
+      config.speechSource = 'online';
+      SoundEffects.playClick();
+      sourceOnlineBtn.className = "py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950";
+      sourceSystemBtn.className = "py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+    });
+
+    sourceSystemBtn.addEventListener('click', () => {
+      config.speechSource = 'system';
+      SoundEffects.playClick();
+      sourceSystemBtn.className = "py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950";
+      sourceOnlineBtn.className = "py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+    });
+
+    // อัปเดตอินเทอร์เฟซตามหน้าต่างการตั้งค่า
+    function updateStatsUI() {
+      infoRange.textContent = `${config.min} - ${config.max}`;
+      infoCount.textContent = `${config.count} ตัว`;
+      infoNoRepeat.textContent = config.noRepeat ? "เปิดใช้งาน" : "ปิดใช้งาน";
+      infoDrawnCount.textContent = drawnNumbers.length;
+
+      const totalPool = (config.max - config.min) + 1;
+      const remain = totalPool - drawnNumbers.length;
+      infoRemainCount.textContent = config.noRepeat ? (remain >= 0 ? remain : 0) : "ไม่จำกัด";
+    }
+
+    // เปิด/ปิด การตั้งค่า
+    openSettingsBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      // ดึงค่าปัจจุบันมาโชว์ใน Input
+      inputMin.value = config.min;
+      inputMax.value = config.max;
+      inputCountRange.value = config.count;
+      labelCountVal.textContent = `${config.count} ตัว`;
+      inputNoRepeat.checked = config.noRepeat;
+      inputSpeech.checked = config.enableSpeech;
+
+      // แสดงค่าขนาดฟอนต์และความเร็วในการตั้งค่าปัจจุบัน
+      inputFontSize.value = config.fontSizeScale;
+      labelFontSizeVal.textContent = `${Math.round(config.fontSizeScale * 100)}%`;
+      inputSpeechRate.value = config.speechRate;
+      labelSpeechRateVal.textContent = `${config.speechRate}x`;
+
+      // อัปเดตปุ่มเลือกแหล่งเสียงพูดใน Settings
+      if (config.speechSource === 'online') {
+        sourceOnlineBtn.click();
+      } else {
+        sourceSystemBtn.click();
+      }
+
+      // อัปเดตประวัติในกล่องแสดงผลก่อนโชว์
+      renderHistory();
+
+      settingsModal.classList.remove('pointer-events-none', 'opacity-0');
+      settingsPanel.classList.remove('translate-x-full');
+    });
+
+    function closeSettings() {
+      settingsModal.classList.add('pointer-events-none', 'opacity-0');
+      settingsPanel.classList.add('translate-x-full');
+    }
+
+    closeSettingsBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      closeSettings();
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        SoundEffects.playClick();
+        closeSettings();
+      }
+    });
+
+    // อัปเดตตัวเลขแสดงผลของ Range input
+    inputCountRange.addEventListener('input', (e) => {
+      labelCountVal.textContent = `${e.target.value} ตัว`;
+    });
+
+    // บันทึกการตั้งค่า
+    saveSettingsBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      const minVal = parseInt(inputMin.value);
+      const maxVal = parseInt(inputMax.value);
+      const countVal = parseInt(inputCountRange.value);
+
+      // Validation ตรวจสอบความถูกต้องเบื้องต้น
+      if (isNaN(minVal) || isNaN(maxVal)) {
+        showAlert('กรุณากรอกตัวเลขเริ่มต้นและตัวเลขสิ้นสุดให้ถูกต้อง');
+        return;
+      }
+      if (minVal > maxVal) {
+        showAlert('ตัวเลขเริ่มต้นต้องไม่มากกว่าตัวเลขสิ้นสุด');
+        return;
+      }
+      if (minVal < 0 || maxVal < 0) {
+        showAlert('กรุณาใช้ตัวเลขที่มีค่าตั้งแต่ 0 ขึ้นไป');
+        return;
+      }
+      if ((maxVal - minVal + 1) < countVal && inputNoRepeat.checked) {
+        showAlert(`ช่วงตัวเลขที่มีมีทั้งหมด ${maxVal - minVal + 1} ตัว ไม่เพียงพอสำหรับการสุ่มพร้อมกันครั้งละ ${countVal} ตัวแบบห้ามซ้ำกัน`);
+        return;
+      }
+
+      // บันทึกค่าลง State
+      config.min = minVal;
+      config.max = maxVal;
+      config.count = countVal;
+      config.noRepeat = inputNoRepeat.checked;
+      config.enableSpeech = inputSpeech.checked;
+      
+      // อัปเดตสเกลตัวอักษรและความเร็วของเสียงพูด
+      config.fontSizeScale = parseFloat(inputFontSize.value);
+      config.speechRate = parseFloat(inputSpeechRate.value);
+
+      // อัปเดตสถานะปุ่มไอคอนพูดด่วนตามค่าที่ตั้ง
+      updateSpeechIconUI();
+
+      // ล้างข้อมูลเพื่อเริ่มรอบใหม่ตามการตั้งค่าใหม่
+      resetDraws();
+      closeSettings();
+      
+      // แสดงข้อความสเตตัสพร้อมสุ่ม
+      renderPlaceholder();
+      statusMessage.textContent = `บันทึกการตั้งค่าแล้ว พร้อมสำหรับการสุ่ม!`;
+    });
+
+    // ล้างประวัติทั้งหมด
+    function resetDraws() {
+      drawnNumbers = [];
+      lastResults = [0]; // คืนค่าเป็นเริ่มต้น
+      updateWrittenTextUI(lastResults);
+      renderHistory();
+      updateStatsUI();
+    }
+
+    quickResetBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      if (drawnNumbers.length > 0) {
+        resetDraws();
+        renderPlaceholder();
+        statusMessage.textContent = "เริ่มประวัติการสุ่มใหม่แล้ว!";
+      } else {
+        statusMessage.textContent = "ระบบยังไม่มีประวัติการสุ่มใดๆ";
+      }
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      resetDraws();
+      renderHistory();
+    });
+
+    // เรนเดอร์หน้าจอเริ่มต้น หรือตอนรีเซ็ต
+    function renderPlaceholder() {
+      numberDisplayContainer.innerHTML = '';
+      
+      // การดีไซน์กล่อง Placeholder ให้ดูน่าตื่นตาตื่นใจ
+      const numPlaceholder = document.createElement('div');
+      numPlaceholder.className = "lucky-number-card font-mono-num font-extrabold leading-none text-slate-700/50 dark:text-slate-700/50 transition-all duration-300 tracking-wider";
+      
+      // แสดงจำนวนตัวอักษรของค่าสูงสุดเพื่อจัดหน้าให้เหมาะสม
+      const numLength = String(config.max).length;
+      numPlaceholder.textContent = '?'.repeat(numLength);
+      
+      numberDisplayContainer.appendChild(numPlaceholder);
+      adjustFontSize(); // ประยุกต์ขนาดอักษรปัจจุบัน
+    }
+
+    // วาดรายการประวัติใน Sidebar
+    function renderHistory() {
+      historyCountLabel.textContent = drawnNumbers.length;
+      historyContainer.innerHTML = '';
+
+      if (drawnNumbers.length === 0) {
+        historyContainer.innerHTML = '<p class="text-xs text-slate-500 text-center w-full py-4">ยังไม่มีประวัติการสุ่ม</p>';
+        return;
+      }
+
+      // วนซ้ำประวัติจากหลังสุดไปหน้าสุด
+      const reversedDraws = [...drawnNumbers].reverse();
+      reversedDraws.forEach((num, index) => {
+        const item = document.createElement('div');
+        item.className = "px-3 py-1.5 bg-slate-800 text-amber-400 font-mono-num font-bold rounded-lg border border-slate-700 text-sm flex items-center space-x-1 hover:border-amber-500/50 transition-colors";
+        
+        // แสดงลำดับย้อนหลัง
+        const order = drawnNumbers.length - index;
+        item.innerHTML = `<span class="text-slate-500 text-[10px] mr-1">#${order}</span>${num}`;
+        historyContainer.appendChild(item);
+      });
+    }
+
+    // ปรับเปลี่ยนธีม (Light/Dark Mode)
+    toggleThemeBtn.addEventListener('click', () => {
+      SoundEffects.playClick();
+      config.darkMode = !config.darkMode;
+      
+      if (config.darkMode) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.remove('bg-slate-50', 'text-slate-900');
+        document.body.classList.add('bg-slate-900', 'text-slate-100');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('bg-slate-900', 'text-slate-100');
+        document.body.classList.add('bg-slate-50', 'text-slate-900');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    });
+
+    // เปิดปิดเสียงเอฟเฟกต์
+    toggleSoundBtn.addEventListener('click', () => {
+      SoundEffects.enabled = !SoundEffects.enabled;
+      SoundEffects.playClick();
+      
+      if (SoundEffects.enabled) {
+        soundIcon.setAttribute('data-lucide', 'volume-2');
+        toggleSoundBtn.classList.remove('bg-red-950/40', 'text-red-400');
+        toggleSoundBtn.classList.add('bg-slate-800', 'text-slate-300');
+      } else {
+        soundIcon.setAttribute('data-lucide', 'volume-x');
+        toggleSoundBtn.classList.remove('bg-slate-800', 'text-slate-300');
+        toggleSoundBtn.classList.add('bg-red-950/40', 'text-red-400');
+      }
+      lucide.createIcons();
+    });
+
+    // เปิดปิดการอ่านออกเสียงด่วน (Speech TTS Toggle)
+    toggleSpeechBtn.addEventListener('click', () => {
+      config.enableSpeech = !config.enableSpeech;
+      SoundEffects.playClick();
+      updateSpeechIconUI();
+    });
+
+    // อัปเดตการแสดงผลปุ่มไอคอนไมโครโฟนพูด
+    function updateSpeechIconUI() {
+      if (config.enableSpeech) {
+        speechIcon.setAttribute('data-lucide', 'audio-lines');
+        toggleSpeechBtn.classList.remove('bg-red-950/40', 'text-red-400');
+        toggleSpeechBtn.classList.add('bg-slate-800', 'text-slate-300');
+      } else {
+        speechIcon.setAttribute('data-lucide', 'mic-off');
+        toggleSpeechBtn.classList.remove('bg-slate-800', 'text-slate-300');
+        toggleSpeechBtn.classList.add('bg-red-950/40', 'text-red-400');
+        
+        stopAllSpeech();
+      }
+      lucide.createIcons();
+    }
+
+    // ================= แกนหลักของการสุ่ม (RNG Core Engine) =================
+    
+    // สุ่มตัวเลขเดี่ยวในช่วงที่กำหนด
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // ฟังก์ชันปรับขนาดฟอนต์ของตัวเลขสุ่มให้เต็มจอได้อย่างพอเหมาะโดยอัตโนมัติ (Responsive Auto-fit + ปรับขนาดสเกลตามผู้ใช้เลือก)
+    function adjustFontSize() {
+      const itemsCount = numberDisplayContainer.children.length;
+      const elements = numberDisplayContainer.querySelectorAll('.lucky-number-card');
+      
+      let baseVw = 16; // อิงขนาดเริ่มต้นกรณีทั่วไป
+
+      if (itemsCount === 1) {
+        baseVw = 18;
+      } else if (itemsCount <= 3) {
+        baseVw = 10;
+      } else if (itemsCount <= 6) {
+        baseVw = 7;
+      } else {
+        baseVw = 5;
+      }
+
+      // คูณสเกลขนาดจากหน้าตั้งค่า (config.fontSizeScale) เข้าไปด้วย
+      const finalFontSize = (baseVw * config.fontSizeScale) + "vw";
+
+      elements.forEach(el => {
+        el.style.fontSize = finalFontSize;
+      });
+    }
+
+    // เริ่มการสุ่มเมื่อคลิกปุ่ม
+    rollBtn.addEventListener('click', () => {
+      if (isRolling) return;
+
+      const totalPoolSize = (config.max - config.min) + 1;
+      
+      // เช็คว่าจำนวนตัวเลขในพูลที่เหลือเพียงพอกับจำนวนที่ต้องการสุ่มต่อครั้งหรือไม่ (เฉพาะกรณี No Repeat)
+      if (config.noRepeat) {
+        const remainingPool = totalPoolSize - drawnNumbers.length;
+        if (remainingPool < config.count) {
+          showAlert(`ตัวเลขในระบบไม่เพียงพอสำหรับการสุ่มครั้งละ ${config.count} ตัวแล้ว! กรุณากดปุ่ม "เริ่มใหม่" เพื่อเริ่มรอบใหม่`);
+          return;
+        }
+      }
+
+      // หยุดเสียงที่เคยค้างอยู่ทันทีเมื่อมีการสุ่มรอบใหม่
+      stopAllSpeech();
+
+      // เริ่มดำเนินการสุ่ม (Start Rolling Effect)
+      isRolling = true;
+      rollBtn.disabled = true;
+      rollBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      statusMessage.textContent = "กำลังหมุนวงล้อสุ่มตัวเลข...";
+
+      // ปิดการคลิกปุ่มสปีชคอนโทรลชั่วคราวระหว่างวิ่งแรนดอม
+      speakThBtn.classList.add('opacity-40', 'pointer-events-none');
+      speakEnBtn.classList.add('opacity-40', 'pointer-events-none');
+
+      // สร้างเป้าหมายผลลัพธ์ที่จะได้รับล่วงหน้า
+      let resultsThisRound = [];
+      while (resultsThisRound.length < config.count) {
+        const candidate = getRandomInt(config.min, config.max);
+        
+        if (config.noRepeat) {
+          // ห้ามซ้ำประวัติเดิม และ ห้ามซ้ำกับพวกที่พึ่งกำลังสุ่มได้ในรอบเดียวกันนี้ด้วย
+          if (!drawnNumbers.includes(candidate) && !resultsThisRound.includes(candidate)) {
+            resultsThisRound.push(candidate);
+          }
+        } else {
+          // ซ้ำได้ แต่อย่างน้อยในรอบสุ่มเดียวกันไม่ควรซ้ำกันเพื่อให้ได้อรรถรสที่ดีกว่า
+          if (!resultsThisRound.includes(candidate)) {
+            resultsThisRound.push(candidate);
+          }
+        }
+      }
+
+      // บันทึกตัวแปรโกลบอลสำหรับรอบนี้
+      lastResults = resultsThisRound;
+
+      // เคลียร์พื้นที่แสดงผลและวาดการ์ดสำหรับสุ่มเตรียมไว้
+      numberDisplayContainer.innerHTML = '';
+      const cards = [];
+
+      for (let i = 0; i < config.count; i++) {
+        const card = document.createElement('div');
+        // ตกแต่งการ์ดแสดงผลตัวเลข
+        card.className = "lucky-number-card font-mono-num font-extrabold leading-none transition-all duration-150 transform scale-95 border-amber-500/10";
+        card.style.color = "rgb(156, 163, 175)"; // ให้สี Slate-400 ก่อนระหว่างวิ่ง
+        
+        // ใส่เอฟเฟกต์แอนิเมชันตอนตัวเลขเริ่มโชว์
+        card.textContent = getRandomInt(config.min, config.max);
+        numberDisplayContainer.appendChild(card);
+        cards.push(card);
+      }
+
+      adjustFontSize();
+
+      // สร้างแอนิเมชันตอนตัวเลขวิ่งสลับเร็วๆ (Shuffle Effect)
+      let shuffleTicks = 0;
+      const totalTicks = 20; // จำนวนเฟรมสปินวิ่งก่อนจะหยุดที่คำตอบจริง
+      const intervalDelay = 80; // ระยะเวลาหน่วงแต่ละเฟรม (ms)
+
+      const shuffleInterval = setInterval(() => {
+        shuffleTicks++;
+        SoundEffects.playTick();
+
+        // เปลี่ยนตัวเลขแรนดอมหลอกๆ ไปเรื่อยๆ
+        cards.forEach((card, index) => {
+          card.textContent = getRandomInt(config.min, config.max);
+        });
+
+        // จังหวะที่จะทยอยหยุดทีละตัวเพื่อความระทึกใจ (Staggered Stop)
+        if (shuffleTicks >= totalTicks) {
+          clearInterval(shuffleInterval);
+          
+          // สรุปผลลัพธ์ของแต่ละใบการ์ด
+          cards.forEach((card, index) => {
+            const finalNum = resultsThisRound[index];
+            card.textContent = finalNum;
+            
+            // เปลี่ยนสีตัวเลขและขยายขนาดแสดงถึงชัยชนะ
+            card.style.color = "rgb(245, 158, 11)"; // Amber-500 สีทองโดดเด่น
+            card.classList.add('winner-pulse', 'scale-100');
+            card.classList.remove('scale-95');
+
+            // บันทึกตัวเลขนี้ลงประวัติระบบหลัก
+            drawnNumbers.push(finalNum);
+          });
+
+          // อัปเดตสเตตัสเสร็จสิ้น
+          SoundEffects.playSuccess();
+          isRolling = false;
+          rollBtn.disabled = false;
+          rollBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          
+          if (config.count === 1) {
+            statusMessage.innerHTML = `ได้ตัวเลขผู้โชคดีเรียบร้อยแล้ว: <strong class="text-amber-500 font-bold">${resultsThisRound[0]}</strong>`;
+          } else {
+            statusMessage.innerHTML = `สุ่มครบแล้ว <strong class="text-amber-500 font-bold">${config.count}</strong> จำนวน`;
+          }
+
+          // อัปเดตกล่องตัวหนังสือคำอ่านภาษาเขียนบนหน้าจอ (TH / EN)
+          updateWrittenTextUI(resultsThisRound);
+
+          // ปรับปรุงผลการสถิติ UI
+          updateStatsUI();
+
+          // ปลดล็อกให้สามารถกดปุ่มสปีชคอนโทรลแมนนวลได้อีกครั้ง
+          speakThBtn.classList.remove('opacity-40', 'pointer-events-none');
+          speakEnBtn.classList.remove('opacity-40', 'pointer-events-none');
+
+          // รันเสียงพูดภาษาไทยอัตโนมัติโดยตรงจากข้อความตัวหนังสือที่แปลงเสร็จแล้ว
+          if (config.enableSpeech) {
+            speakThaiText(resultsThisRound);
+          }
+        }
+      }, intervalDelay);
+    });
+
+    // ================= ผูกเหตุการณ์การคลิกให้กับปุ่ม Manual TTS =================
+
+    // ผูก Event Listener ปุ่มอ่านออกเสียงภาษาไทยแบบ Manual
+    speakThBtn.addEventListener('click', () => {
+      if (isRolling) return; // ไม่ทำงานขณะกำลังวิ่งสุ่มอยู่
+      SoundEffects.playClick();
+      if (lastResults && lastResults.length > 0) {
+        speakThaiText(lastResults);
+      }
+    });
+
+    // ผูก Event Listener ปุ่มอ่านออกเสียงภาษาอังกฤษแบบ Manual
+    speakEnBtn.addEventListener('click', () => {
+      if (isRolling) return; // ไม่ทำงานขณะกำลังวิ่งสุ่มอยู่
+      SoundEffects.playClick();
+      if (lastResults && lastResults.length > 0) {
+        speakEnglishText(lastResults);
+      }
+    });
+
+    // เริ่มต้นระบบครั้งแรก
+    window.onload = function () {
+      config.darkMode = true;
+      renderPlaceholder();
+      updateStatsUI();
+      updateSpeechIconUI();
+      updateWrittenTextUI(lastResults);
+
+      // อุ่นเครื่องการโหลดเสียงภาษาไทยของเบราว์เซอร์
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+          };
+        }
+      }
+    };
+  </script>
+</body>
+</html>
